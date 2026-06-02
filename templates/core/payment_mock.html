@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Simulador de Pagamento (Dev){% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto py-12 text-center">
+    <div class="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 rounded-2xl shadow-xl p-8">
+        <div class="text-4xl mb-4">🧪</div>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Simulador de Pagamento</h2>
+        <p class="text-sm text-yellow-700 dark:text-yellow-400 font-semibold mb-1">Ambiente de desenvolvimento — não use em produção</p>
+        <p class="text-gray-500 dark:text-gray-400 mb-6">
+            Pedido #{{ request.GET.order_id }} aguardando aprovação simulada.
+        </p>
+        <a href="/payment/mock/?order_id={{ request.GET.order_id }}"
+            class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-4 rounded-xl transition text-lg shadow-lg">
+            ✓ Simular pagamento aprovado
+        </a>
+        <br><br>
+        <a href="/payment/failure/" class="text-sm text-red-500 hover:underline">Simular falha</a>
+        &nbsp;·&nbsp;
+        <a href="/payment/pending/" class="text-sm text-yellow-600 hover:underline">Simular pendente</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,258 @@
+{
+  "generated_at": "2026-05-31T00:00:00Z",
+  "re_extraction": true,
+  "modules": [
+    {
+      "name": "store_saas",
+      "path": "store_saas/",
+      "purpose": "Configuração do projeto Django, roteador ASGI híbrido Django+FastAPI, bootstrap do Celery",
+      "primary_files": [
+        "store_saas/asgi.py",
+        "store_saas/settings.py",
+        "store_saas/celery.py",
+        "store_saas/urls.py"
+      ],
+      "functions": [
+        {
+          "name": "application",
+          "file": "store_saas/asgi.py",
+          "params": ["scope", "receive", "send"],
+          "returns": "ASGI response",
+          "confidence": "confirmed",
+          "description": "Roteia /api/* para FastAPI, demais para Django. Ajusta scope.path e root_path."
+        }
+      ],
+      "entities": [],
+      "business_rules": [
+        {
+          "description": "Requests com path /api/* são roteados ao FastAPI; strip do prefixo /api feito no scope antes do dispatch",
+          "location": "store_saas/asgi.py:12-24",
+          "confidence": "confirmed"
+        },
+        {
+          "description": "Login por email configurado via allauth ACCOUNT_LOGIN_METHODS; ModelBackend mantido para login por username",
+          "location": "store_saas/settings.py:56-65",
+          "confidence": "confirmed"
+        }
+      ],
+      "dependencies": ["core", "accounts"],
+      "algorithms": [],
+      "complexity": "low"
+    },
+    {
+      "name": "core",
+      "path": "core/",
+      "purpose": "Módulo principal de negócio: modelos de domínio, catálogo, carrinho, checkout, pagamento (Checkout Pro + Uber Direct), painel do manager, API FastAPI, tasks Celery",
+      "primary_files": [
+        "core/models.py",
+        "core/views.py",
+        "core/api.py",
+        "core/payment.py",
+        "core/uber_direct.py",
+        "core/tasks.py",
+        "core/cart.py",
+        "core/middleware.py",
+        "core/context_processors.py"
+      ],
+      "functions": [
+        {
+          "name": "checkout",
+          "file": "core/views.py",
+          "params": ["request: HttpRequest (POST)"],
+          "returns": "HttpResponse (script redirect ou erro HTML)",
+          "confidence": "confirmed",
+          "description": "Cria Order + OrderItems em atomic(). Calcula taxa (Uber ou estática). Ramifica por payment_method: online→MP Checkout Pro, cash/card→process_new_order."
+        },
+        {
+          "name": "create_checkout_pro_preference",
+          "file": "core/payment.py",
+          "params": ["order: Order"],
+          "returns": "dict {init_point, preference_id} ou None",
+          "confidence": "confirmed",
+          "description": "Cria preference MP. Mock dev para token TEST-0000. Fallback mock em caso de erro."
+        },
+        {
+          "name": "mercadopago_webhook",
+          "file": "core/api.py",
+          "params": ["request: Request", "payload: dict"],
+          "returns": "dict {status: ok}",
+          "confidence": "confirmed",
+          "description": "Valida HMAC-SHA256. Lookup Order por external_reference (Checkout Pro) com fallback mp_payment_id (PIX). approved→PREPARING, cancelled/expired→CANCELED."
+        },
+        {
+          "name": "uber_direct_quote",
+          "file": "core/api.py",
+          "params": ["body: UberQuoteRequest", "tenant: Store"],
+          "returns": "dict {available, quote_id, fee, fee_display, expires_at}",
+          "confidence": "confirmed",
+          "description": "Cotação Uber em tempo real. Retorna fallback_fee se Uber não configurado ou erro."
+        },
+        {
+          "name": "uber_direct_webhook",
+          "file": "core/api.py",
+          "params": ["request: Request"],
+          "returns": "dict {}",
+          "confidence": "confirmed",
+          "description": "Valida HMAC Uber. Dispara process_uber_webhook.delay(). Responde 200 imediatamente."
+        },
+        {
+          "name": "process_uber_webhook",
+          "file": "core/tasks.py",
+          "params": ["delivery_id: str", "new_status: str", "raw_payload: dict"],
+          "returns": "None",
+          "confidence": "confirmed",
+          "description": "Celery task. select_for_update + atomic. Idempotente. Sincroniza Order.status para DELIVERING/COMPLETED quando status Uber avança."
+        },
+        {
+          "name": "dashboard",
+          "file": "core/views.py",
+          "params": ["request"],
+          "returns": "HttpResponse",
+          "confidence": "confirmed",
+          "description": "KPIs: total_orders_pending conta PENDING + CONFIRMED (feat 014)."
+        },
+        {
+          "name": "save_location",
+          "file": "core/views.py",
+          "params": ["request: POST"],
+          "returns": "HttpResponse('')",
+          "confidence": "confirmed",
+          "description": "Grava delivery_address em session. Retorno vazio permite HTMX remover o banner do DOM."
+        }
+      ],
+      "entities": [
+        {
+          "name": "Store",
+          "fields": [
+            {"name": "id", "type": "BigAutoField", "required": true},
+            {"name": "name", "type": "CharField(255)", "required": true},
+            {"name": "subdomain", "type": "CharField(255)", "required": true, "unique": true},
+            {"name": "is_active", "type": "BooleanField", "required": true, "default": true},
+            {"name": "delivery_fee", "type": "DecimalField(10,2)", "required": true, "default": "0.00", "new": "feat_007"},
+            {"name": "free_delivery_threshold", "type": "DecimalField(10,2)", "required": false, "default": null, "new": "feat_007"},
+            {"name": "mercadopago_access_token", "type": "CharField(255)", "required": false},
+            {"name": "owner", "type": "OneToOneField(User)", "required": false}
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "Order",
+          "fields": [
+            {"name": "id", "type": "BigAutoField", "required": true},
+            {"name": "store", "type": "FK(Store)", "required": true},
+            {"name": "user", "type": "FK(User)", "required": false},
+            {"name": "status", "type": "CharField choices", "required": true, "default": "PENDING", "choices": ["OPEN","PENDING","CONFIRMED","PREPARING","DELIVERING","COMPLETED","CANCELED"]},
+            {"name": "total_amount", "type": "DecimalField(10,2)", "required": true, "default": "0.00"},
+            {"name": "delivery_fee", "type": "DecimalField(10,2)", "required": true, "default": "0.00", "note": "snapshot", "new": "feat_007"},
+            {"name": "payment_method", "type": "CharField(10) choices", "required": true, "default": "online", "new": "feat_014"},
+            {"name": "change_amount", "type": "DecimalField(10,2)", "required": false, "new": "feat_014"},
+            {"name": "card_type", "type": "CharField(10) choices", "required": false, "new": "feat_014"},
+            {"name": "mp_payment_id", "type": "CharField(64)", "required": false, "unique": true},
+            {"name": "mp_preference_id", "type": "CharField(255)", "required": false, "new": "feat_013"},
+            {"name": "uber_quote_id", "type": "CharField(255)", "required": false, "new": "feat_009"},
+            {"name": "table_label", "type": "CharField(100)", "required": false}
+          ],
+          "confidence": "confirmed"
+        },
+        {
+          "name": "UberDirectConfig",
+          "fields": [
+            {"name": "store", "type": "OneToOneField(Store)", "required": true},
+            {"name": "uber_store_id", "type": "CharField(255)", "required": true},
+            {"name": "is_active", "type": "BooleanField", "required": true, "default": false}
+          ],
+          "confidence": "confirmed",
+          "new": "feat_009"
+        },
+        {
+          "name": "UberDirectDelivery",
+          "fields": [
+            {"name": "order", "type": "OneToOneField(Order)", "required": true},
+            {"name": "uber_delivery_id", "type": "CharField(255)", "required": false, "unique": true},
+            {"name": "status", "type": "CharField(50) choices", "required": true, "default": "PENDING"}
+          ],
+          "confidence": "confirmed",
+          "new": "feat_009"
+        },
+        {
+          "name": "UserProfile",
+          "fields": [
+            {"name": "user", "type": "OneToOneField(User)", "required": true},
+            {"name": "phone", "type": "CharField(20)", "required": false, "default": ""}
+          ],
+          "confidence": "confirmed",
+          "new": "feat_010"
+        },
+        {
+          "name": "UserSettings",
+          "fields": [
+            {"name": "user", "type": "OneToOneField(User)", "required": true},
+            {"name": "theme", "type": "CharField(10) choices", "required": true, "default": "system", "choices": ["system","light","dark"]}
+          ],
+          "confidence": "confirmed"
+        }
+      ],
+      "business_rules": [
+        {"description": "Pedido na entrega nasce CONFIRMED e vai direto para process_new_order, sem MP", "location": "core/views.py:261-264", "confidence": "confirmed"},
+        {"description": "Checkout exige autenticação (feat 012 eliminou guest checkout)", "location": "templates/cart_drawer.html", "confidence": "confirmed"},
+        {"description": "Taxa de entrega: Uber quote tem prioridade sobre taxa estática quando Uber ativo", "location": "core/views.py:183-201", "confidence": "confirmed"},
+        {"description": "Token Uber OAuth2 cacheado no Redis com TTL", "location": "core/uber_direct.py:93-114", "confidence": "confirmed"},
+        {"description": "Webhook MP: lookup por external_reference (Checkout Pro) com fallback mp_payment_id (PIX legado)", "location": "core/api.py:237-251", "confidence": "confirmed"}
+      ],
+      "dependencies": ["accounts", "store_saas"],
+      "algorithms": [
+        "effective_delivery_fee: Uber quote vs threshold vs taxa estática (core/views.py:183-201)",
+        "HMAC-SHA256 validation: MercadoPago (core/api.py:199-209) e Uber Direct (core/uber_direct.py:45-50)",
+        "Token cache com TTL: Redis setex com expires_in-60 (core/uber_direct.py:84-90)",
+        "Username gerado do email com deduplicação numérica (accounts/forms.py:59-65)"
+      ],
+      "complexity": "high"
+    },
+    {
+      "name": "accounts",
+      "path": "accounts/",
+      "purpose": "Autenticação de usuários: signup, login, logout, criação de loja, modal de auth no checkout, Google OAuth2 (allauth), reset de senha",
+      "primary_files": [
+        "accounts/views.py",
+        "accounts/forms.py",
+        "accounts/urls.py"
+      ],
+      "functions": [
+        {
+          "name": "auth_modal_view",
+          "file": "accounts/views.py",
+          "params": ["request"],
+          "returns": "HttpResponse (modal HTML ou script redirect)",
+          "confidence": "confirmed",
+          "description": "Se autenticado: redirect /checkout/ via script. Senão: renderiza modal com abas Google/Entrar/Cadastrar."
+        },
+        {
+          "name": "checkout_login_view",
+          "file": "accounts/views.py",
+          "params": ["request: POST"],
+          "returns": "HttpResponse (script redirect ou partial HTML)",
+          "confidence": "confirmed",
+          "description": "Login por email com fallback username. Se válido: script redirect /checkout/."
+        },
+        {
+          "name": "checkout_signup_view",
+          "file": "accounts/views.py",
+          "params": ["request: POST"],
+          "returns": "HttpResponse (script redirect ou partial HTML)",
+          "confidence": "confirmed",
+          "description": "Signup no modal. Cria UserProfile com phone. Script redirect /checkout/."
+        }
+      ],
+      "entities": [],
+      "business_rules": [
+        {"description": "Email obrigatório em todos os formulários de signup (customer e loja)", "location": "accounts/forms.py", "confidence": "confirmed"},
+        {"description": "Subdomínios reservados (www, api, admin...) bloqueados no cadastro de loja", "location": "accounts/forms.py:6-14", "confidence": "confirmed"},
+        {"description": "Username gerado automaticamente do email no CheckoutSignupForm com deduplicação", "location": "accounts/forms.py:59-65", "confidence": "confirmed"},
+        {"description": "Login por email ou username: ModelBackend autentica por username, mas checkout_login_view faz lookup por email", "location": "accounts/views.py:83-101", "confidence": "confirmed"}
+      ],
+      "dependencies": ["core"],
+      "algorithms": [],
+      "complexity": "medium"
+    }
+  ]
+}

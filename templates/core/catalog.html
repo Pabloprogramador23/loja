@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Cardápio - {{ request.tenant.name }}{% endblock %}
+
+{% block content %}
+{% if not session_delivery_address and not request.user.is_staff %}
+<div id="location-banner" class="bg-indigo-50 dark:bg-indigo-900/30 border-b border-indigo-200 dark:border-indigo-700">
+    <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8">
+        <form hx-post="{% url 'save_location' %}"
+              hx-target="#location-banner"
+              hx-swap="outerHTML"
+              class="flex flex-col sm:flex-row items-center gap-3">
+            {% csrf_token %}
+            <span class="text-sm text-indigo-700 dark:text-indigo-300 font-medium whitespace-nowrap">
+                📍 Qual é o seu endereço de entrega?
+            </span>
+            <input id="location-input"
+                   type="text"
+                   name="delivery_address"
+                   placeholder="Ex: Rua das Flores, 42 - Centro"
+                   class="flex-1 min-w-0 rounded-md border-indigo-300 dark:border-indigo-600 dark:bg-gray-800 dark:text-gray-100 shadow-sm text-sm p-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <div class="flex items-center gap-2 shrink-0">
+                <button type="button"
+                        onclick="if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){document.getElementById('location-input').value=p.coords.latitude.toFixed(4)+', '+p.coords.longitude.toFixed(4)},function(){alert('Localização não disponível.')})}"
+                        class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline whitespace-nowrap">
+                    🌐 Usar GPS
+                </button>
+                <button type="submit"
+                        class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-md transition whitespace-nowrap">
+                    Confirmar
+                </button>
+                <button type="button"
+                        _="on click add .hidden to #location-banner"
+                        class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap">
+                    Agora não
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+<!-- Hero Section -->
+<div class="relative bg-white dark:bg-gray-800 pb-8">
+    <!-- Cover Banner -->
+    <div class="h-48 md:h-64 w-full bg-cover bg-center"
+        style="background-image: url('{% if request.tenant.cover_image %}{{ request.tenant.cover_image.url }}{% else %}https://ui-avatars.com/api/?name={{ request.tenant.name|urlencode }}&background=6366f1&color=fff&size=512{% endif %}'); 
+                {% if not request.tenant.cover_image %}background: linear-gradient(to right, #4f46e5, #9333ea);{% endif %}">
+        <div class="w-full h-full bg-black bg-opacity-20"></div>
+    </div>
+
+    <!-- Store Info Card (Floating) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative -mt-16">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col sm:flex-row items-center sm:items-end gap-6">
+            <!-- Logo -->
+            <div class="relative flex-shrink-0">
+                <div
+                    class="h-24 w-24 sm:h-32 sm:w-32 rounded-full ring-4 ring-white dark:ring-gray-700 overflow-hidden bg-white dark:bg-gray-700 shadow-md">
+                    {% if request.tenant.logo %}
+                    <img src="{{ request.tenant.logo.url }}" alt="{{ request.tenant.name }}"
+                        class="h-full w-full object-cover">
+                    {% else %}
+                    <div
+                        class="h-full w-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 font-bold text-2xl">
+                        {{ request.tenant.name|slice:":2"|upper }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 text-center sm:text-left mb-2">
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ request.tenant.name }}</h1>
+                <div class="flex items-center justify-center sm:justify-start gap-2 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span class="flex items-center gap-1 text-green-600 bg-green-50 dark:text-green-300 dark:bg-green-900/40 px-2 py-1 rounded-full font-medium">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                        Aberto agora
+                    </span>
+                    <span>•</span>
+                    <span>Entrega 30-45 min</span>
+                    <span>•</span>
+                    <span class="text-indigo-600 font-semibold">$$$</span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="mb-2">
+                <!-- Search or extra actions could go here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Navigation (Pills) -->
+<div id="category-nav-container">
+    {% include 'core/partials/category_pills.html' %}
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div id="product-grid">
+        {% include 'core/partials/product_list.html' %}
+    </div>
+</div>
+
+<style>
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
+{% endblock %}

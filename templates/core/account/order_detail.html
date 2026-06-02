@@ -1,0 +1,94 @@
+{% extends 'core/account/base_account.html' %}
+
+{% block account_content %}
+<div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+        <div>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">Detalhes do Pedido</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Informações completas sobre o pedido #{{ order.id }}</p>
+        </div>
+        <a href="{% url 'account_orders' %}" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300">
+            &larr; Voltar
+        </a>
+    </div>
+
+    <div class="border-t border-gray-200 dark:border-gray-700">
+        <dl>
+            <div class="bg-gray-50 dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</dt>
+                <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+                    <span
+                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                    {% if order.status == 'COMPLETED' %}bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300{% elif order.status == 'PENDING' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300{% elif order.status == 'CANCELED' %}bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300{% else %}bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300{% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </dd>
+            </div>
+            <div class="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Data do Pedido</dt>
+                <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">{{ order.created_at|date:"d/m/Y H:i" }}
+                </dd>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Taxa de Entrega</dt>
+                <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+                    {% if order.delivery_fee == 0 %}
+                    <span class="text-green-600 dark:text-green-400">Grátis</span>
+                    {% else %}
+                    R$ {{ order.delivery_fee }}
+                    {% endif %}
+                </dd>
+            </div>
+            <div class="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total do Pedido</dt>
+                <dd class="mt-1 text-sm font-bold text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">R$ {{ order.total_amount }}</dd>
+            </div>
+            <div class="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Endereço de Entrega</dt>
+                <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+                    {{ order.delivery_address }}
+                </dd>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Cliente</dt>
+                <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+                    {{ order.customer_name }} <br>
+                    <span class="text-gray-500 dark:text-gray-400">{{ order.customer_phone }}</span>
+                </dd>
+            </div>
+        </dl>
+    </div>
+
+    <!-- Items List -->
+    <div class="border-t border-gray-200 dark:border-gray-700 px-4 py-5 sm:px-6">
+        <h4 class="text-base font-medium text-gray-900 dark:text-gray-100 mb-4">Itens do Pedido</h4>
+        <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700 border-t border-b border-gray-200 dark:border-gray-700">
+            {% for item in order.items.all %}
+            <li class="py-4 flex">
+                {% if item.product.image %}
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                    class="h-16 w-16 w-full object-cover rounded-md border border-gray-200 dark:border-gray-700">
+                {% else %}
+                <div
+                    class="h-16 w-16 bg-gray-200 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 text-xs">
+                    Sem img
+                </div>
+                {% endif %}
+                <div class="ml-4 flex-1 flex flex-col">
+                    <div>
+                        <div class="flex justify-between text-base font-medium text-gray-900 dark:text-gray-100">
+                            <h3>{{ item.product.name }}</h3>
+                            <p class="ml-4">R$ {{ item.total_price }}</p>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ item.product.category.name }}</p>
+                    </div>
+                    <div class="flex-1 flex items-end justify-between text-sm">
+                        <p class="text-gray-500 dark:text-gray-400">{{ item.quantity }}x R$ {{ item.unit_price }}</p>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

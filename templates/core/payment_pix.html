@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Pagamento PIX - {{ order.store.name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100">
+            Pagamento via PIX
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+            Pedido #{{ order.id }}
+        </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center">
+
+            <div class="mb-6">
+                <span class="text-4xl font-bold text-gray-900 dark:text-gray-100">R$ {{ order.total_amount }}</span>
+            </div>
+
+            <div class="flex justify-center mb-6">
+                {% if payment_data.qr_code_base64 and payment_data.qr_code_base64|length > 100 %}
+                <img src="data:image/jpeg;base64,{{ payment_data.qr_code_base64 }}" alt="QR Code PIX"
+                    class="w-64 h-64 border-4 border-gray-200 dark:border-gray-600 rounded-lg bg-white">
+                {% else %}
+                <div class="w-64 h-64 border-4 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center text-center p-4">
+                    <svg class="w-12 h-12 text-gray-400 dark:text-gray-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                    </svg>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">QR Code indisponível</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Configure o MercadoPago nas configurações da loja</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Escaneie o QR Code acima ou copie o código abaixo:</p>
+
+            <div class="relative rounded-md shadow-sm mb-6">
+                <input type="text" id="pix-code" readonly value="{{ payment_data.qr_code }}"
+                    class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pr-10 sm:text-sm border-gray-300 dark:border-gray-600 rounded-md p-3 bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-300">
+                <button onclick="copyToClipboard()"
+                    class="absolute inset-y-0 right-0 px-3 flex items-center bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700 focus:outline-none">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Polling for Payment Status -->
+            <div hx-get="/api/orders/{{ order.id }}/check-status" hx-trigger="load delay:3s, every 3s"
+                hx-target="#payment-status-message" class="hidden">
+            </div>
+
+            <div id="payment-status-message">
+                <div class="flex items-center justify-center text-yellow-600 animate-pulse">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Aguardando pagamento...
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% if not request.user.is_authenticated %}
+<div class="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 rounded-lg p-4 text-center">
+        <h3 class="text-sm font-bold text-indigo-800 dark:text-indigo-300">Não perca seu pedido!</h3>
+        <p class="text-xs text-indigo-600 dark:text-indigo-400 mt-1 mb-3">
+            Crie uma conta agora para acompanhar o status e salvar seu endereço.
+        </p>
+        <a href="{% url 'signup' %}"
+            class="inline-block bg-indigo-600 text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-indigo-700 transition">
+            Criar Conta Rapidamente
+        </a>
+    </div>
+</div>
+{% endif %}
+
+</div>
+
+<script>
+    function copyToClipboard() {
+        var copyText = document.getElementById("pix-code");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(copyText.value).then(() => {
+            alert("Código PIX copiado!");
+        });
+    }
+
+    document.body.addEventListener('paymentConfirmed', function (evt) {
+        window.location.href = "{% url 'order_track' order.id %}";
+    });
+</script>
+{% endblock %}

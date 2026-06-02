@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Rastreio #{{ order.id }} - {{ request.tenant.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-12 px-4">
+    <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
+                Acompanhe seu Pedido
+            </h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
+                Detalhes e progresso da entrega.
+            </p>
+        </div>
+        <div class="border-t border-gray-200 dark:border-gray-700 px-4 py-5 sm:px-6">
+            <!-- HTMX loaded progress bar -->
+            <div hx-get="/api/orders/{{ order.id }}/track" hx-trigger="load"
+                hx-headers='{"X-Tenant-Subdomain": "{{ request.tenant.subdomain }}"}'>
+                <div class="animate-pulse h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+            </div>
+
+            <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 mt-8">
+                <div class="sm:col-span-1">
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Pedido</dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">#{{ order.id }}</dd>
+                </div>
+                <div class="sm:col-span-1">
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total</dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">R$ {{ order.total_amount }}</dd>
+                </div>
+                <div class="sm:col-span-2">
+                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Itens</dt>
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                        <ul class="border border-gray-200 dark:border-gray-700 rounded-md divide-y divide-gray-200 dark:divide-gray-700">
+                            {% for item in order.items.all %}
+                            <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                                <div class="w-0 flex-1 flex items-center">
+                                    <span class="ml-2 flex-1 w-0 truncate">
+                                        {{ item.quantity }}x {{ item.product.name }}
+                                    </span>
+                                </div>
+                                <div class="ml-4 flex-shrink-0">
+                                    R$ {{ item.total_price }}
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+</div>
+{% endblock %}

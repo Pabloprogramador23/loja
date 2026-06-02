@@ -1,0 +1,152 @@
+{% extends 'core/manager/base_manager.html' %}
+
+{% block manager_content %}
+<div class="md:flex md:items-center md:justify-between mb-6">
+    <div class="flex-1 min-w-0">
+        <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:text-3xl sm:truncate">
+            Configurações da Loja
+        </h2>
+    </div>
+</div>
+
+<div class="bg-white dark:bg-gray-800 shadow px-4 py-5 sm:rounded-lg sm:p-6">
+    <div class="md:grid md:grid-cols-3 md:gap-6">
+        <div class="md:col-span-1">
+            <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">Identidade & Pagamentos</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Personalize sua loja e configure como você recebe pagamentos.
+            </p>
+        </div>
+        <div class="mt-5 md:mt-0 md:col-span-2">
+            <form action="." method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                <div class="rounded-md bg-red-50 dark:bg-red-900/30 p-4 mb-5">
+                    <div class="flex">
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800 dark:text-red-300">Erro ao salvar:</h3>
+                            <ul class="list-disc pl-5 mt-2 text-sm text-red-700 dark:text-red-400">
+                                {% for field in form %}
+                                {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="grid grid-cols-6 gap-6">
+                    <!-- Store Name -->
+                    <div class="col-span-6 sm:col-span-4">
+                        <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ form.name.label }}
+                        </label>
+                        {{ form.name }}
+                    </div>
+
+                    <!-- Mercado Pago Token -->
+                    <div class="col-span-6">
+                        <label for="{{ form.mercadopago_access_token.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ form.mercadopago_access_token.label }}
+                        </label>
+                        {{ form.mercadopago_access_token }}
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            Seu Access Token de Produção ou Teste do Mercado Pago.
+                        </p>
+                    </div>
+
+                    <!-- Taxa de Entrega -->
+                    <div class="col-span-6 sm:col-span-3">
+                        <label for="{{ form.delivery_fee.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ form.delivery_fee.label }}
+                        </label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 dark:text-gray-400 sm:text-sm">R$</span>
+                            </div>
+                            <div class="pl-8">{{ form.delivery_fee }}</div>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Use 0,00 para entrega gratuita.</p>
+                        {% if form.delivery_fee.errors %}
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.delivery_fee.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Entrega grátis acima de -->
+                    <div class="col-span-6">
+                        <div class="flex items-center mb-2">
+                            <input type="checkbox" id="toggle_threshold"
+                                class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                {% if form.instance.free_delivery_threshold is not None %}checked{% endif %}
+                                onchange="document.getElementById('threshold_field').classList.toggle('hidden', !this.checked); if(!this.checked){ document.getElementById('id_free_delivery_threshold').value=''; }">
+                            <label for="toggle_threshold" class="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Ativar entrega grátis acima de um valor mínimo
+                            </label>
+                        </div>
+                        <div id="threshold_field" class="{% if form.instance.free_delivery_threshold is None %}hidden{% endif %}">
+                            <label for="{{ form.free_delivery_threshold.id_for_label }}"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {{ form.free_delivery_threshold.label }}
+                            </label>
+                            <div class="mt-1 relative rounded-md shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 dark:text-gray-400 sm:text-sm">R$</span>
+                                </div>
+                                <div class="pl-8">{{ form.free_delivery_threshold }}</div>
+                            </div>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Pedidos com subtotal igual ou maior recebem entrega gratuita.</p>
+                            {% if form.free_delivery_threshold.errors %}
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.free_delivery_threshold.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Logo -->
+                    <div class="col-span-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ form.logo.label }}
+                        </label>
+                        <div class="mt-1 flex items-center">
+                            {% if request.tenant.logo %}
+                            <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 mr-4">
+                                <img src="{{ request.tenant.logo.url }}" class="h-full w-full object-cover">
+                            </span>
+                            {% endif %}
+                            {{ form.logo }}
+                        </div>
+                    </div>
+
+                    <!-- Cover Image -->
+                    <div class="col-span-6">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ form.cover_image.label }}
+                        </label>
+                        <div class="mt-1 flex items-center">
+                            {% if request.tenant.cover_image %}
+                            <span class="inline-block h-12 w-12 rounded overflow-hidden bg-gray-100 dark:bg-gray-700 mr-4">
+                                <img src="{{ request.tenant.cover_image.url }}" class="h-10 w-20 object-cover">
+                            </span>
+                            {% endif %}
+                            {{ form.cover_image }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-5 border-t border-gray-200 dark:border-gray-700 mt-5">
+                    <div class="flex justify-end">
+                        <button type="submit"
+                            class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Salvar Configurações
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

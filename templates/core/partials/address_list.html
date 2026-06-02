@@ -1,0 +1,39 @@
+{% if address_error %}
+<p class="text-sm text-red-600 dark:text-red-400 font-medium bg-red-50 dark:bg-red-900/30 p-2 rounded border border-red-200 dark:border-red-800 mb-2">
+    {{ address_error }}
+</p>
+{% endif %}
+
+{% for address in addresses %}
+<div class="flex justify-between items-center p-3 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded mb-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+    onclick="selectAddress(this, '{{ address.street }}, {{ address.number }} - {{ address.neighborhood }}, {{ address.city }} - {{ address.state }}{% if address.zip_code %}, CEP {{ address.zip_code }}{% endif %}')">
+    <div class="text-sm">
+        <p class="font-bold">{{ address.street }}, {{ address.number }}</p>
+        <p class="text-gray-500 dark:text-gray-400">{{ address.neighborhood }} - {{ address.city }}</p>
+    </div>
+    <button hx-post="{% url 'delete_address' address.id %}" hx-target="#saved-addresses-list"
+        class="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+            </path>
+        </svg>
+    </button>
+</div>
+{% empty %}
+<p class="text-sm text-gray-500 dark:text-gray-400 italic">Nenhum endereço salvo.</p>
+{% endfor %}
+
+<script>
+    function selectAddress(el, fullAddress) {
+        document.querySelector('[name=delivery_address]').value = fullAddress;
+        document.querySelectorAll('#saved-addresses-list > div').forEach(d => d.classList.remove('border-green-500', 'bg-green-50', 'dark:border-green-400'));
+        el.classList.add('border-green-500', 'bg-green-50');
+    }
+
+    // Auto-seleciona o primeiro endereço salvo ao carregar
+    (function () {
+        const first = document.querySelector('#saved-addresses-list > div[onclick]');
+        if (first) first.click();
+    })();
+</script>

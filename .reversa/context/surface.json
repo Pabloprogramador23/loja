@@ -1,0 +1,144 @@
+{
+  "generated_at": "2026-05-31T00:00:00Z",
+  "project_root": "C:/Users/Pablo/Desktop/loja",
+  "re_extraction": true,
+  "previous_extraction": "2026-05-29T00:00:00Z",
+  "languages": [
+    { "name": "Python", "extensions": [".py"], "file_count": 59 },
+    { "name": "HTML", "extensions": [".html"], "file_count": 48 }
+  ],
+  "primary_language": "Python",
+  "frameworks": [
+    { "name": "Django", "version": ">=5.0 (5.2.6)", "source": "requirements.txt + settings.py" },
+    { "name": "FastAPI", "version": ">=0.110.0", "source": "requirements.txt" },
+    { "name": "Celery", "version": "latest", "source": "requirements.txt" },
+    { "name": "HTMX", "version": "CDN", "source": "base.html" },
+    { "name": "Tailwind CSS", "version": "CDN/build", "source": "base.html" },
+    { "name": "Hyperscript", "version": "CDN", "source": "base.html" },
+    { "name": "django-allauth", "version": ">=65.0.0", "source": "requirements.txt", "new": true },
+    { "name": "httpx", "version": "latest", "source": "requirements.txt", "new": true }
+  ],
+  "package_manager": "pip",
+  "entry_points": [
+    { "path": "store_saas/asgi.py", "type": "asgi_hybrid_router" },
+    { "path": "manage.py", "type": "django_management" },
+    { "path": "store_saas/celery.py", "type": "celery_worker" }
+  ],
+  "config_files": [
+    "store_saas/settings.py",
+    ".env",
+    ".env.example",
+    ".env.prod",
+    "docker-compose.yml",
+    "docker-compose.prod.yml"
+  ],
+  "ci_cd": [],
+  "docker": {
+    "dockerfile": "Dockerfile",
+    "compose": "docker-compose.yml",
+    "compose_prod": "docker-compose.prod.yml"
+  },
+  "database_hints": [
+    { "path": "core/migrations/", "type": "django_migrations", "count": 14 },
+    { "path": "db.sqlite3", "type": "sqlite_dev" }
+  ],
+  "test_framework": "Django TestCase + TransactionTestCase",
+  "test_file_count": 11,
+  "modules": [
+    "store_saas",
+    "core",
+    "accounts"
+  ],
+  "total_files": 120,
+  "integrations": [
+    {
+      "name": "MercadoPago Checkout Pro",
+      "type": "payment_gateway",
+      "files": ["core/payment.py", "core/api.py"],
+      "changed": true,
+      "note": "Migrado de PIX para Checkout Pro (feat 013)"
+    },
+    {
+      "name": "Uber Direct",
+      "type": "delivery_service",
+      "files": ["core/uber_direct.py", "core/api.py"],
+      "new": true,
+      "note": "Novo — feat 009"
+    },
+    {
+      "name": "Google OAuth2 (django-allauth)",
+      "type": "social_auth",
+      "files": ["accounts/views.py", "store_saas/settings.py"],
+      "new": true,
+      "note": "Novo — feat 012"
+    },
+    {
+      "name": "Redis",
+      "type": "cache_broker",
+      "files": ["store_saas/celery.py", "core/uber_direct.py"],
+      "changed": false
+    }
+  ],
+  "new_files_since_last_extraction": [
+    "core/uber_direct.py",
+    "core/migrations/0010_store_delivery_fee_order_delivery_fee.py",
+    "core/migrations/0011_uber_direct.py",
+    "core/migrations/0012_userprofile.py",
+    "core/migrations/0013_order_mp_preference_id.py",
+    "core/migrations/0014_order_payment_fields.py",
+    "templates/accounts/auth_modal.html",
+    "templates/accounts/partials/modal_login.html",
+    "templates/accounts/partials/modal_signup.html",
+    "templates/core/payment_success.html",
+    "templates/core/payment_pending.html",
+    "templates/core/payment_failure.html",
+    "templates/core/payment_mock.html",
+    "templates/core/partials/uber_delivery_status.html",
+    "templates/registration/password_reset.html",
+    "templates/registration/password_reset_done.html",
+    "templates/registration/password_reset_confirm.html",
+    "templates/registration/password_reset_complete.html",
+    "templates/registration/password_reset_email.html",
+    "core/tests_checkout_delivery.py",
+    "core/tests_checkout_pro.py",
+    "core/tests_checkout_ux.py",
+    "core/tests_dashboard_confirmed.py",
+    "core/tests_location.py",
+    "core/tests_uber.py"
+  ],
+  "heavily_modified_files": [
+    "core/models.py",
+    "core/views.py",
+    "core/api.py",
+    "core/payment.py",
+    "core/forms.py",
+    "core/context_processors.py",
+    "core/tasks.py",
+    "core/urls.py",
+    "accounts/views.py",
+    "accounts/forms.py",
+    "accounts/urls.py",
+    "store_saas/settings.py",
+    "store_saas/urls.py",
+    "templates/core/partials/cart_drawer.html",
+    "templates/core/partials/order_modal.html",
+    "templates/core/manager/partials/order_row.html",
+    "templates/core/catalog.html",
+    "templates/base.html"
+  ],
+  "organization_suggestion": {
+    "granularity": "module",
+    "rationale": "Projeto organizado em 3 módulos Django top-level (store_saas, core, accounts) com roteamento centralizado em urls.py.",
+    "signals": [
+      {
+        "type": "top_level_domain_folders",
+        "evidence": ["core/", "accounts/", "store_saas/"]
+      },
+      {
+        "type": "centralized_routing",
+        "evidence": ["store_saas/urls.py", "core/urls.py", "accounts/urls.py"]
+      }
+    ],
+    "features": []
+  }
+}

@@ -1,0 +1,48 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Painel - {{ request.tenant.name }}{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Pedidos Recentes</h1>
+    <div class="flex items-center space-x-2">
+        <span class="flex h-3 w-3 relative">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+        </span>
+        <span class="text-sm text-gray-500 dark:text-gray-400 font-medium">Ao vivo</span>
+    </div>
+</div>
+
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+    <table class="min-w-full leading-normal">
+        <thead>
+            <tr class="bg-gray-800 dark:bg-gray-900 text-white text-left text-xs font-semibold uppercase tracking-wider">
+                <th class="px-5 py-3 border-b-2 border-gray-700">ID</th>
+                <th class="px-5 py-3 border-b-2 border-gray-700">Cliente</th>
+                <th class="px-5 py-3 border-b-2 border-gray-700">Total</th>
+                <th class="px-5 py-3 border-b-2 border-gray-700">Status</th>
+                <th class="px-5 py-3 border-b-2 border-gray-700">Data</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-700" hx-get="/api/orders" hx-trigger="load, every 5s" hx-swap="innerHTML"
+            hx-headers='{"X-Tenant-Subdomain": "{{ request.tenant.subdomain }}"}'>
+            <tr>
+                <td colspan="5" class="px-5 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                    <div class="flex flex-col items-center justify-center">
+                        <svg class="animate-spin h-8 w-8 text-indigo-500 mb-4" xmlns="http://www.w3.org/2000/svg"
+                            fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        Carregando...
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

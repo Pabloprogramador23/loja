@@ -1,0 +1,122 @@
+{% extends 'core/account/base_account.html' %}
+
+{% block account_content %}
+<div class="shadow sm:rounded-md sm:overflow-hidden bg-white dark:bg-gray-800">
+    <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">Seus Dados</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Mantenha seus dados atualizados para agilizar novas compras.</p>
+
+        <form action="." method="POST" class="mt-6 space-y-6">
+            {% csrf_token %}
+            {% if form.errors %}
+            <div class="rounded-md bg-red-50 dark:bg-red-900/30 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                            fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800 dark:text-red-300">Foram encontrados erros no envio:</h3>
+                        <div class="mt-2 text-sm text-red-700 dark:text-red-400">
+                            <ul class="list-disc pl-5 space-y-1">
+                                {% for field in form %}
+                                {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-6 gap-6">
+                <div class="col-span-6 sm:col-span-3">
+                    <label for="{{ form.first_name.id_for_label }}"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.help_text %}
+                    <p class="mt-2 text-sm text-gray-400">{{ form.first_name.help_text }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="col-span-6 sm:col-span-3">
+                    <label for="{{ form.last_name.id_for_label }}"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sobrenome</label>
+                    {{ form.last_name }}
+                </div>
+
+                <div class="col-span-6 sm:col-span-4">
+                    <label for="{{ form.email.id_for_label }}"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                    {{ form.email }}
+                    {% if form.email.help_text %}
+                    <p class="mt-2 text-sm text-gray-500">{{ form.email.help_text }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="pt-5">
+                <div class="flex justify-end">
+                    <button type="submit"
+                        class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="mt-8 bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
+    <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+        <div>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">Últimos Pedidos</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Acompanhe suas compras recentes.</p>
+        </div>
+        <a href="{% url 'account_orders' %}" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300">Ver
+            todos</a>
+    </div>
+    <div class="border-t border-gray-200 dark:border-gray-700">
+        <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+            {% for order in last_orders %}
+            <li>
+                <div class="px-4 py-4 sm:px-6">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-indigo-600 dark:text-indigo-400 truncate">
+                            Pedido #{{ order.id }}
+                        </p>
+                        <div class="ml-2 flex-shrink-0 flex">
+                            <span
+                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            {% if order.status == 'COMPLETED' %}bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300{% elif order.status == 'PENDING' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300{% elif order.status == 'CANCELED' %}bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300{% else %}bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mt-2 sm:flex sm:justify-between">
+                        <div class="sm:flex">
+                            <p class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                R$ {{ order.total_amount }}
+                            </p>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0">
+                            <p>
+                                {{ order.created_at|date:"d/m/Y H:i" }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            {% empty %}
+            <li class="px-4 py-4 sm:px-6 text-sm text-gray-500 dark:text-gray-400 text-center">Nenhum pedido recente.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

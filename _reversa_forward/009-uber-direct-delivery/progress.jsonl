@@ -1,0 +1,24 @@
+{"ts":"2026-05-30T00:00:00Z","action":"T001","status":"done","files":["requirements.txt"]}
+{"ts":"2026-05-30T00:00:01Z","action":"T002","status":"done","files":["store_saas/settings.py"]}
+{"ts":"2026-05-30T00:00:02Z","action":"T003","status":"done","files":["core/models.py"]}
+{"ts":"2026-05-30T00:00:03Z","action":"T004","status":"done","files":["core/migrations/0011_uber_direct.py"]}
+{"ts":"2026-05-30T00:00:04Z","action":"T005","status":"done","files":["core/uber_direct.py"]}
+{"ts":"2026-05-30T00:00:05Z","action":"T006","status":"done","files":["core/tests.py"]}
+{"ts":"2026-05-30T00:00:06Z","action":"T007","status":"done","files":["core/tests_uber.py"]}
+{"ts":"2026-05-30T00:00:07Z","action":"T008","status":"done","files":["core/tasks.py"]}
+{"ts":"2026-05-30T00:00:08Z","action":"T009","status":"done","files":["core/api.py"]}
+{"ts":"2026-05-30T00:00:09Z","action":"T010","status":"done","files":["core/api.py"]}
+{"ts":"2026-05-30T00:00:10Z","action":"T011","status":"done","files":["core/views.py"]}
+{"ts":"2026-05-30T00:00:11Z","action":"T012","status":"done","files":["core/views.py"]}
+{"ts":"2026-05-30T00:00:12Z","action":"T013","status":"done","files":["core/urls.py"]}
+{"ts":"2026-05-30T00:00:13Z","action":"T014","status":"done","files":["core/forms.py"]}
+{"ts":"2026-05-30T00:00:14Z","action":"T015","status":"done","files":["core/views.py"]}
+{"ts":"2026-05-30T00:00:15Z","action":"T016","status":"done","files":["templates/core/partials/cart_drawer.html"]}
+{"ts":"2026-05-30T00:00:16Z","action":"T017","status":"done","files":["templates/core/manager/settings.html"]}
+{"ts":"2026-05-30T00:00:17Z","action":"T018","status":"done","files":["templates/core/partials/uber_delivery_status.html"]}
+{"ts":"2026-05-30T00:00:18Z","action":"T019","status":"done","files":["templates/core/partials/order_modal.html"]}
+{"ts":"2026-05-30T00:00:19Z","action":"T020","status":"done","files":["core/tests_checkout.py"]}
+{"ts":"2026-05-30T00:00:20Z","action":"T021","status":"done","files":["core/tests_uber.py"]}
+{"ts":"2026-05-30T00:00:21Z","action":"T022","status":"done","files":["core/tests_uber.py"]}
+{"ts":"2026-05-30T00:01:00Z","action":"T021","status":"corrected","note":"Substituído Django Client por Starlette TestClient para endpoint FastAPI; path sem prefixo /api","files":["core/tests_uber.py"]}
+{"ts":"2026-05-30T00:01:01Z","action":"T022","status":"corrected","note":"Corrigido @patch target de core.views.UberDirectClient para core.uber_direct.UberDirectClient (import lazy dentro da função)","files":["core/tests_uber.py"]}

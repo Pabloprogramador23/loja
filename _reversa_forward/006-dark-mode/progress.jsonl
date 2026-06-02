@@ -1,0 +1,23 @@
+{"ts":"2026-05-29T14:00:00Z","action":"T001","status":"done","note":"modelo UserSettings já existia em core/models.py (sessão anterior); validado contra o spec","files":["core/models.py"]}
+{"ts":"2026-05-29T14:05:00Z","action":"T002","status":"done","files":["core/migrations/0009_usersettings.py"]}
+{"ts":"2026-05-29T14:10:00Z","action":"T003","status":"done","files":["core/context_processors.py","store_saas/settings.py"]}
+{"ts":"2026-05-29T14:15:00Z","action":"T004","status":"done","files":["templates/base.html"]}
+{"ts":"2026-05-29T14:18:00Z","action":"T005","status":"done","files":["templates/dashboard_base.html"]}
+{"ts":"2026-05-29T14:25:00Z","action":"T008","status":"done","note":"view set_theme; executada antes de T006/T007 por dependência","files":["core/views.py"]}
+{"ts":"2026-05-29T14:27:00Z","action":"T009","status":"done","files":["core/urls.py"]}
+{"ts":"2026-05-29T14:35:00Z","action":"T006","status":"done","files":["core/tests.py"]}
+{"ts":"2026-05-29T14:38:00Z","action":"T007","status":"done","note":"5 testes do endpoint /set-theme/","files":["core/tests.py"]}
+{"ts":"2026-05-29T14:50:00Z","action":"T010","status":"done","note":"toggle + chrome dark + função toggleTheme()","files":["templates/base.html"]}
+{"ts":"2026-05-29T14:55:00Z","action":"T011","status":"done","files":["templates/dashboard_base.html"]}
+{"ts":"2026-05-29T15:05:00Z","action":"T012","status":"done","files":["templates/core/index.html","templates/core/catalog.html","templates/core/partials/category_pills.html","templates/core/partials/product_list.html"]}
+{"ts":"2026-05-29T15:15:00Z","action":"T013","status":"done","note":"add_to_cart_response.html sem superfície a tematizar","files":["templates/core/partials/cart_drawer.html","templates/core/partials/order_modal.html"]}
+{"ts":"2026-05-29T15:22:00Z","action":"T014","status":"done","files":["templates/core/partials/checkout_error.html","templates/core/partials/checkout_success.html","templates/core/payment_pix.html"]}
+{"ts":"2026-05-29T15:32:00Z","action":"T015","status":"done","files":["templates/core/order_track.html","templates/core/my_orders.html","templates/core/account/orders.html","templates/core/account/order_detail.html"]}
+{"ts":"2026-05-29T15:42:00Z","action":"T016","status":"done","files":["templates/core/account/base_account.html","templates/core/account/dashboard.html","templates/core/account/addresses.html","templates/core/partials/address_list.html"]}
+{"ts":"2026-05-29T15:55:00Z","action":"T017","status":"done","files":["templates/core/manager/base_manager.html","templates/core/manager/dashboard.html","templates/core/manager/orders.html","templates/core/manager/partials/order_row.html"]}
+{"ts":"2026-05-29T16:05:00Z","action":"T018","status":"done","files":["templates/core/manager/products.html","templates/core/manager/product_form.html","templates/core/manager/settings.html"]}
+{"ts":"2026-05-29T16:18:00Z","action":"T019","status":"done","files":["templates/core/manager/comanda_list.html","templates/core/manager/comanda_detail.html","templates/core/manager/_comanda_items.html","templates/core/manager_create_order.html"]}
+{"ts":"2026-05-29T16:22:00Z","action":"T020","status":"done","note":"layout tematizado; linhas via /api/orders ficam fora dos templates (observação)","files":["templates/core/dashboard.html"]}
+{"ts":"2026-05-29T16:30:00Z","action":"T021","status":"done","files":["templates/accounts/login.html","templates/accounts/signup.html","templates/accounts/criar_loja.html"]}
+{"ts":"2026-05-29T16:38:00Z","action":"T022","status":"done","note":"contraste WCAG AA revisado nas telas-chave; paleta consistente, sem ajustes adicionais necessários","files":["templates/core/index.html","templates/core/payment_pix.html","templates/core/manager/dashboard.html"]}
+{"ts":"2026-05-29T16:42:00Z","action":"T023","status":"done","note":"parciais HTMX com variantes dark próprias; gap conhecido em /api/orders (server-side)","files":["templates/core/partials/category_pills.html","templates/core/partials/product_list.html","templates/core/partials/cart_drawer.html","templates/core/partials/order_modal.html","templates/core/partials/address_list.html","templates/core/manager/_comanda_items.html","templates/core/manager/partials/order_row.html"]}

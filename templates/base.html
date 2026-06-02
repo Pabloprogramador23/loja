@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}StoreSaaS{% endblock %}</title>
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- Tailwind CSS (Dev Only) -->
+    <script>window.tailwind = { config: { darkMode: 'class' } };</script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Dark mode bootstrap (anti-FOUC). Ordem: preferência do servidor (logado) -> localStorage -> SO. -->
+    <script>
+        (function () {
+            var serverPref = '{{ theme_pref }}';
+            var stored = null;
+            try { stored = localStorage.getItem('theme'); } catch (e) { }
+            var pref = (serverPref && serverPref !== 'system') ? serverPref : (stored || 'system');
+            var isDark;
+            if (pref === 'dark') { isDark = true; }
+            else if (pref === 'light') { isDark = false; }
+            else { isDark = window.matchMedia('(prefers-color-scheme: dark)').matches; }
+            document.documentElement.classList.toggle('dark', isDark);
+        })();
+    </script>
+</head>
+
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 font-sans transition-colors" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    {% csrf_token %}
+
+    <header class="bg-indigo-600 dark:bg-indigo-800 text-white shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <a href="/" class="flex items-center gap-3">
+                    {% if request.tenant.logo %}
+                    <img src="{{ request.tenant.logo.url }}" alt="{{ request.tenant.name }}"
+                        class="h-10 w-auto rounded">
+                    {% else %}
+                    <span class="text-xl font-bold">{{ request.tenant.name|default:"StoreSaaS" }}</span>
+                    {% endif %}
+                </a>
+            </div>
+            <nav class="flex items-center gap-4">
+                {% if request.user_can_manage %}
+                <!-- Admin Menu -->
+                <span class="text-sm text-indigo-200">Olá, {{ user.username }} (Gestor)</span>
+                <a href="{% url 'dashboard' %}" class="text-indigo-100 hover:text-white font-medium">Painel</a>
+                <a href="{% url 'manager_orders' %}" class="text-indigo-100 hover:text-white font-medium">Pedidos</a>
+                <a href="{% url 'comanda_list' %}" class="text-indigo-100 hover:text-white font-medium">Comandas</a>
+                <a href="{% url 'manager_products' %}" class="text-indigo-100 hover:text-white font-medium">Catálogo</a>
+                <a href="{% url 'manager_settings' %}" class="text-indigo-100 hover:text-white font-medium">Configurações</a>
+                <a href="/" class="text-indigo-100 hover:text-white font-medium">Ver Vitrine</a>
+                <form action="{% url 'logout' %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="text-indigo-100 hover:text-white font-medium">Sair</button>
+                </form>
+                {% else %}
+                <!-- Client Menu -->
+                <a href="/catalog/" class="text-indigo-100 hover:text-white font-medium">Vitrine</a>
+
+                {% if user.is_authenticated %}
+                <span class="text-sm text-indigo-200">Olá, {{ user.username }}</span>
+                <a href="{% url 'account_orders' %}" class="text-indigo-100 hover:text-white font-medium">Meus Pedidos</a>
+                <form action="{% url 'logout' %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="text-indigo-100 hover:text-white font-medium">Sair</button>
+                </form>
+                {% else %}
+                <a href="{% url 'login' %}" class="text-indigo-100 hover:text-white font-medium">Entrar</a>
+                <a href="{% url 'signup' %}"
+                    class="bg-indigo-500 hover:bg-indigo-700 text-white px-3 py-1.5 rounded transition">Cadastrar</a>
+                {% endif %}
+
+                <!-- Cart Icon -->
+                <button class="relative p-2 text-indigo-100 hover:text-white" hx-get="{% url 'cart_detail' %}"
+                    hx-target="#cart-drawer-content" _="on click remove .translate-x-full from #cart-drawer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg>
+                    <!-- Cart Count Badge (Target for OOB Swap) -->
+                    <span id="cart-count"
+                        class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full absolute -top-1 -right-1">
+                        {{ cart.total_items }}
+                    </span>
+                </button>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    {% if not request.user_can_manage %}
+    <!-- Mobile Floating Cart Button -->
+    <button
+        class="fixed bottom-4 right-4 z-30 bg-indigo-600 dark:bg-indigo-800 text-white p-4 rounded-full shadow-lg md:hidden flex items-center justify-center hover:bg-indigo-700 dark:hover:bg-indigo-700 transition"
+        hx-get="{% url 'cart_detail' %}" hx-target="#cart-drawer-content"
+        _="on click remove .translate-x-full from #cart-drawer">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+            </path>
+        </svg>
+        <span id="mobile-cart-count"
+            class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+            {{ cart.total_items }}
+        </span>
+    </button>
+    {% endif %}
+
+    <!-- Toast Container (Target for OOB Swap) -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col items-end pointer-events-none"></div>
+
+    <!-- Modal Container -->
+    <div id="modal-container"></div>
+
+    <!-- Auth Modal Container -->
+    <div id="auth-modal-container" class="fixed inset-0 z-50 hidden bg-black/50 flex items-center justify-center p-4"></div>
+
+    <!-- Cart Drawer (Offscreen) -->
+    <div id="cart-drawer"
+        class="fixed inset-y-0 right-0 w-full max-w-sm bg-white dark:bg-gray-800 dark:text-gray-100 shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-40">
+        <div id="cart-drawer-content" class="h-full">
+            <!-- Content loaded via HTMX -->
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+
+    <main class="container mx-auto px-4 py-8">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <script>
+
+        document.body.addEventListener('htmx:configRequest', (event) => {
+            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        });
+
+        // Listen for server-triggered events
+        document.body.addEventListener('showMessage', function (evt) {
+            const message = evt.detail.value;
+            const container = document.getElementById('toast-container');
+
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = 'bg-green-500 text-white px-6 py-3 rounded shadow-lg mb-2 flex items-center transition-all duration-500 transform translate-x-full opacity-0';
+            toast.innerHTML = `
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="font-medium">${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            // Animate in
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+            });
+
+            // Animate out and remove
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        });
+    </script>
+    <footer class="bg-gray-800 dark:bg-gray-950 text-gray-300 dark:text-gray-400 py-6 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; {% now "Y" %} StoreSaaS. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

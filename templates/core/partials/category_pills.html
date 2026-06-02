@@ -1,0 +1,21 @@
+<div id="category-pills" class="sticky top-0 z-20 bg-gray-50 dark:bg-gray-900 pt-4 pb-2 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+            <button
+                class="px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-200
+                       {% if not selected_category_id %}bg-purple-600 text-white shadow-md{% else %}bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:border-gray-700{% endif %}"
+                hx-get="{% url 'catalog' %}" hx-target="#product-grid" hx-push-url="true">
+                Todos
+            </button>
+
+            {% for category in categories %}
+            <button
+                class="px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-200
+                       {% if selected_category_id == category.id %}bg-purple-600 text-white shadow-md{% else %}bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:border-gray-700{% endif %}"
+                hx-get="{% url 'catalog' %}?category_id={{ category.id }}" hx-target="#product-grid" hx-push-url="true">
+                {{ category.name }}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+</div>

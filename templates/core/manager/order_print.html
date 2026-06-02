@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Comanda #{{ order.id }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Courier New', monospace; font-size: 13px; color: #000; background: #fff; padding: 16px; max-width: 320px; }
+        h1 { font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 4px; }
+        .store { text-align: center; font-size: 12px; margin-bottom: 12px; }
+        hr { border: none; border-top: 1px dashed #000; margin: 8px 0; }
+        .row { display: flex; justify-content: space-between; margin: 3px 0; }
+        .label { font-weight: bold; }
+        .items table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+        .items td { padding: 2px 0; vertical-align: top; }
+        .items td.qty { width: 28px; }
+        .items td.price { text-align: right; white-space: nowrap; }
+        .total { font-size: 15px; font-weight: bold; }
+        .footer { text-align: center; font-size: 11px; margin-top: 12px; color: #555; }
+        @media print {
+            body { padding: 0; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ order.store.name|default:"Loja" }}</h1>
+    <div class="store">COMANDA DE ENTREGA</div>
+    <hr>
+
+    <div class="row"><span class="label">Pedido:</span> <span>#{{ order.id }}</span></div>
+    <div class="row"><span class="label">Data:</span> <span>{{ order.created_at|date:"d/m/Y H:i" }}</span></div>
+    <div class="row"><span class="label">Status:</span> <span>{{ order.get_status_display }}</span></div>
+    <hr>
+
+    <div class="label" style="margin-bottom:4px">CLIENTE</div>
+    <div>{{ order.customer_name }}</div>
+    <div>{{ order.customer_phone }}</div>
+    <hr>
+
+    <div class="label" style="margin-bottom:4px">ENTREGA</div>
+    <div style="word-break:break-word">{{ order.delivery_address }}</div>
+    <hr>
+
+    <div class="label" style="margin-bottom:4px">ITENS</div>
+    <div class="items">
+        <table>
+            {% for item in order.items.all %}
+            <tr>
+                <td class="qty">{{ item.quantity }}x</td>
+                <td>{{ item.product.name }}</td>
+                <td class="price">R$ {{ item.total_price }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <hr>
+
+    {% if order.delivery_fee and order.delivery_fee > 0 %}
+    <div class="row"><span>Subtotal</span><span>R$ {{ order.total_amount|add:"-"|add:order.delivery_fee }}</span></div>
+    <div class="row"><span>Taxa de entrega</span><span>R$ {{ order.delivery_fee }}</span></div>
+    {% endif %}
+    <div class="row total"><span>TOTAL</span><span>R$ {{ order.total_amount }}</span></div>
+    <hr>
+
+    <div class="row"><span class="label">Pagamento:</span>
+        <span>
+            {% if order.payment_method == 'cash' %}Dinheiro{% elif order.payment_method == 'card' %}Cartão ({{ order.get_card_type_display|default:"" }}){% else %}Online (PIX){% endif %}
+        </span>
+    </div>
+    {% if order.change_amount %}
+    <div class="row"><span class="label">Troco para:</span><span>R$ {{ order.change_amount }}</span></div>
+    {% endif %}
+
+    <div class="footer">{{ order.created_at|date:"d/m/Y" }} — #{{ order.id }}</div>
+
+    <div class="no-print" style="margin-top:20px; text-align:center">
+        <button onclick="window.print()" style="padding:8px 20px; font-size:14px; cursor:pointer;">🖨️ Imprimir</button>
+        <button onclick="window.close()" style="padding:8px 20px; font-size:14px; cursor:pointer; margin-left:8px;">Fechar</button>
+    </div>
+</body>
+</html>

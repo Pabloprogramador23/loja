@@ -1,0 +1,25 @@
+<form hx-post="{% url 'checkout_login' %}" hx-target="#auth-modal-container" hx-swap="innerHTML" class="space-y-4">
+    {% csrf_token %}
+    {% if error %}
+    <div class="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 p-3 rounded-lg border border-red-200 dark:border-red-800">
+        {{ error }}
+    </div>
+    {% endif %}
+    <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-mail</label>
+        <input type="email" name="email" required autocomplete="email"
+            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 p-2.5 text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Senha</label>
+        <input type="password" name="password" required autocomplete="current-password"
+            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 p-2.5 text-sm shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+    </div>
+    <button type="submit"
+        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition text-sm">
+        Entrar
+    </button>
+    <p class="text-center text-xs text-gray-500 dark:text-gray-400">
+        <a href="{% url 'password_reset' %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">Esqueci minha senha</a>
+    </p>
+</form>

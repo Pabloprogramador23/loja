@@ -1,0 +1,10 @@
+{"ts":"2026-05-26T22:10:00Z","action":"T001","status":"done","files":["core/models.py"]}
+{"ts":"2026-05-26T22:10:01Z","action":"T003","status":"done","files":["accounts/forms.py"]}
+{"ts":"2026-05-26T22:10:02Z","action":"T004","status":"done","files":["templates/accounts/criar_loja.html"]}
+{"ts":"2026-05-26T22:10:03Z","action":"T009","status":"done","files":["templates/accounts/login.html"]}
+{"ts":"2026-05-26T22:11:00Z","action":"T002","status":"done","files":["core/migrations/0007_store_owner.py"]}
+{"ts":"2026-05-26T22:12:00Z","action":"T005","status":"done","files":["accounts/views.py"]}
+{"ts":"2026-05-26T22:12:01Z","action":"T006","status":"done","files":["core/views.py"]}
+{"ts":"2026-05-26T22:13:00Z","action":"T007","status":"done","files":["accounts/views.py"]}
+{"ts":"2026-05-26T22:14:00Z","action":"T008","status":"done","files":["accounts/urls.py"]}
+{"ts":"2026-05-26T22:14:01Z","action":"T010","status":"done","files":["core/admin.py"]}

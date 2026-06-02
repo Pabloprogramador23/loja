@@ -1,0 +1,40 @@
+<div id="comanda-items">
+  {% if order.items.all %}
+  <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+    <thead class="bg-gray-50 dark:bg-gray-900">
+      <tr>
+        <th class="px-4 py-2 text-left font-medium text-gray-500 dark:text-gray-400">Produto</th>
+        <th class="px-4 py-2 text-center font-medium text-gray-500 dark:text-gray-400">Qtd</th>
+        <th class="px-4 py-2 text-right font-medium text-gray-500 dark:text-gray-400">Unitário</th>
+        <th class="px-4 py-2 text-right font-medium text-gray-500 dark:text-gray-400">Subtotal</th>
+        <th class="px-4 py-2"></th>
+      </tr>
+    </thead>
+    <tbody class="bg-white dark:bg-gray-800 dark:text-gray-100 divide-y divide-gray-100 dark:divide-gray-700">
+      {% for item in order.items.all %}
+      <tr>
+        <td class="px-4 py-2">{{ item.product.name }}</td>
+        <td class="px-4 py-2 text-center">{{ item.quantity }}</td>
+        <td class="px-4 py-2 text-right">R$ {{ item.unit_price }}</td>
+        <td class="px-4 py-2 text-right">R$ {{ item.total_price }}</td>
+        <td class="px-4 py-2 text-right">
+          <form hx-post="{% url 'comanda_remove_item' order.id item.id %}" hx-target="#comanda-items" hx-swap="outerHTML">
+            {% csrf_token %}
+            <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium">Remover</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot class="bg-gray-50 dark:bg-gray-900">
+      <tr>
+        <td colspan="3" class="px-4 py-2 text-right font-semibold text-gray-700 dark:text-gray-300">Total</td>
+        <td class="px-4 py-2 text-right font-bold text-gray-900 dark:text-gray-100">R$ {{ order.total_amount }}</td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+  {% else %}
+  <p class="text-gray-500 dark:text-gray-400 text-sm py-4">Nenhum item adicionado ainda.</p>
+  {% endif %}
+</div>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="{% if theme_pref == 'dark' %}dark{% endif %}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gerenciamento - StoreSaaS{% endblock %}</title>
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <!-- Dark mode bootstrap (anti-FOUC). Ordem: preferência do servidor (logado) -> localStorage -> SO. -->
+    <script>
+        (function () {
+            var serverPref = '{{ theme_pref }}';
+            var stored = null;
+            try { stored = localStorage.getItem('theme'); } catch (e) { }
+            var pref = (serverPref && serverPref !== 'system') ? serverPref : (stored || 'system');
+            var isDark;
+            if (pref === 'dark') { isDark = true; }
+            else if (pref === 'light') { isDark = false; }
+            else { isDark = window.matchMedia('(prefers-color-scheme: dark)').matches; }
+            document.documentElement.classList.toggle('dark', isDark);
+        })();
+    </script>
+    <script>
+        // Alterna entre tema claro e escuro: aplica a classe, persiste em
+        // localStorage e, se logado, persiste no perfil via POST /set-theme/.
+        function toggleTheme() {
+            var willBeDark = !document.documentElement.classList.contains('dark');
+            document.documentElement.classList.toggle('dark', willBeDark);
+            var value = willBeDark ? 'dark' : 'light';
+            try { localStorage.setItem('theme', value); } catch (e) { }
+            {% if user.is_authenticated %}
+            fetch('{% url "set_theme" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'theme=' + value
+            }).catch(function () { });
+            {% endif %}
+        }
+
+        document.body.addEventListener('htmx:configRequest', (event) => {
+            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        });
+    </script>
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900 dark:text-gray-100 font-sans transition-colors" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    {% csrf_token %}
+
+    <!-- Sidebar -->
+    <aside class="w-64 h-screen fixed left-0 top-0 bg-gray-900 dark:bg-gray-950 text-white flex flex-col shadow-xl z-50">
+        <!-- Logo Area -->
+        <div class="p-6 flex items-center justify-center border-b border-gray-800">
+            {% if request.tenant.logo %}
+            <img src="{{ request.tenant.logo.url }}" class="h-12 w-auto rounded-md" alt="Logo">
+            {% else %}
+            <h1 class="text-2xl font-bold tracking-wider">MANAGER</h1>
+            {% endif %}
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="{% url 'dashboard' %}"
+                class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors {% if request.resolver_match.url_name == 'dashboard' %}bg-gray-800 text-white{% endif %}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                    </path>
+                </svg>
+                Visão Geral
+            </a>
+
+            <a href="{% url 'manager_create_order' %}"
+                class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors {% if request.resolver_match.url_name == 'manager_create_order' %}bg-gray-800 text-white{% endif %}">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Novo Pedido
+            </a>
+
+            <!-- Placeholder Links -->
+            <a href="#"
+                class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                    </path>
+                </svg>
+                Cardápio
+            </a>
+        </nav>
+
+        <!-- User Info & Logout -->
+        <div class="p-4 border-t border-gray-800">
+            <button type="button" onclick="toggleTheme()" aria-label="Alternar tema claro e escuro"
+                class="w-full flex items-center justify-center gap-2 mb-3 px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500">
+                <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                    </path>
+                </svg>
+                <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                    </path>
+                </svg>
+                <span>Tema</span>
+            </button>
+            <div class="flex items-center mb-4 px-2">
+                <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-bold">
+                    {{ request.user.username|slice:":1"|upper }}
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-white">{{ request.user.username }}</p>
+                    <p class="text-xs text-gray-400">Gerente</p>
+                </div>
+            </div>
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit"
+                    class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none">
+                    Sair
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-64 p-8 min-h-screen">
+        <div id="modal-container"></div>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+
+</html>

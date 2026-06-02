@@ -1,0 +1,14 @@
+Django>=5.0
+fastapi>=0.110.0
+uvicorn[standard]
+gunicorn
+celery
+redis
+psycopg2-binary
+django-htmx
+python-decouple
+pydantic
+mercadopago
+whitenoise
+dj-database-url
+Pillow

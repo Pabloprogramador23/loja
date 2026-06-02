@@ -1,0 +1,23 @@
+{"ts":"2026-05-30T23:50:00Z","action":"T001","status":"done","files":["requirements.txt"]}
+{"ts":"2026-05-30T23:50:00Z","action":"T002","status":"done","files":[".env",".env.prod"]}
+{"ts":"2026-05-30T23:51:00Z","action":"T003","status":"done","files":["store_saas/settings.py"]}
+{"ts":"2026-05-30T23:52:00Z","action":"T004","status":"done","files":["store_saas/urls.py"]}
+{"ts":"2026-05-30T23:53:00Z","action":"T005","status":"done","files":["accounts/urls.py"]}
+{"ts":"2026-05-30T23:54:00Z","action":"T006","status":"done","files":[],"note":"manage.py migrate aplicou account.*, sites.*, socialaccount.*"}
+{"ts":"2026-05-30T23:55:00Z","action":"T007","status":"done","files":["accounts/tests.py"]}
+{"ts":"2026-05-30T23:55:00Z","action":"T008","status":"done","files":["accounts/tests.py"]}
+{"ts":"2026-05-30T23:55:00Z","action":"T009","status":"done","files":["accounts/tests.py"]}
+{"ts":"2026-05-30T23:56:00Z","action":"T010","status":"done","files":["accounts/forms.py"]}
+{"ts":"2026-05-30T23:56:00Z","action":"T011","status":"done","files":["accounts/views.py"]}
+{"ts":"2026-05-30T23:57:00Z","action":"T012","status":"done","files":["accounts/views.py"]}
+{"ts":"2026-05-30T23:57:00Z","action":"T013","status":"done","files":["accounts/views.py"]}
+{"ts":"2026-05-30T23:58:00Z","action":"T014","status":"done","files":["accounts/views.py"],"note":"guest_order_id removido de signup_view"}
+{"ts":"2026-05-30T23:59:00Z","action":"T015","status":"done","files":["templates/base.html"]}
+{"ts":"2026-05-30T23:59:00Z","action":"T016","status":"done","files":["templates/accounts/auth_modal.html"]}
+{"ts":"2026-05-31T00:00:00Z","action":"T017","status":"done","files":["templates/accounts/partials/modal_login.html"]}
+{"ts":"2026-05-31T00:00:00Z","action":"T018","status":"done","files":["templates/accounts/partials/modal_signup.html"]}
+{"ts":"2026-05-31T00:01:00Z","action":"T019","status":"done","files":["templates/registration/password_reset.html","templates/registration/password_reset_done.html","templates/registration/password_reset_confirm.html","templates/registration/password_reset_complete.html","templates/registration/password_reset_email.html","templates/registration/password_reset_subject.txt"]}
+{"ts":"2026-05-31T00:02:00Z","action":"T020","status":"done","files":["templates/core/partials/cart_drawer.html"]}
+{"ts":"2026-05-31T00:03:00Z","action":"T021","status":"done","files":["_reversa_forward/012-auth-social-checkout/regression-watch.md","_reversa_forward/012-auth-social-checkout/legacy-impact.md"]}
+{"ts":"2026-05-31T00:04:00Z","action":"T010","status":"corrected","note":"clean_email adicionado ao CheckoutSignupForm para validar unicidade"}
+{"ts":"2026-05-31T00:04:00Z","action":"T012","status":"corrected","note":"backend explícito adicionado ao auth_login() para múltiplos backends"}

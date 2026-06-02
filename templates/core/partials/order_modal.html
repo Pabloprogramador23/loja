@@ -1,0 +1,97 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto" aria-labelledby="modal-title"
+    role="dialog" aria-modal="true">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        onclick="document.getElementById('modal-container').innerHTML = ''"></div>
+
+    <!-- Modal Panel -->
+    <div
+        class="relative bg-white dark:bg-gray-800 dark:text-gray-100 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg w-full m-4">
+        <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div class="sm:flex sm:items-start">
+                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" id="modal-title">
+                        Pedido #{{ order.id }}
+                    </h3>
+                    <div class="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Cliente</p>
+                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ order.customer_name }}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Telefone</p>
+                                <p class="text-sm text-gray-900 dark:text-gray-100">{{ order.customer_phone }}</p>
+                            </div>
+                            <div class="col-span-2">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Endereço</p>
+                                <p class="text-sm text-gray-900 dark:text-gray-100">{{ order.delivery_address }}</p>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-2">Itens</p>
+                        <ul class="divide-y divide-gray-200 dark:divide-gray-700 mb-4 bg-gray-50 dark:bg-gray-900 rounded-md">
+                            {% for item in order.items.all %}
+                            <li class="px-4 py-2 flex justify-between text-sm">
+                                <span>{{ item.quantity }}x {{ item.product.name }}</span>
+                                <span class="text-gray-600 dark:text-gray-400">R$ {{ item.total_price }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+
+                        <div class="flex justify-between items-center pt-2">
+                            <p class="text-base font-bold text-gray-900 dark:text-gray-100">Total</p>
+                            <p class="text-lg font-bold text-gray-900 dark:text-gray-100">R$ {{ order.total_amount }}</p>
+                        </div>
+
+                        <!-- Badge de método de pagamento -->
+                        <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">Pagamento</p>
+                            {% if order.payment_method == 'cash' %}
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
+                                💵 Dinheiro{% if order.change_amount %} — troco para R$ {{ order.change_amount }}{% endif %}
+                            </span>
+                            {% elif order.payment_method == 'card' %}
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300">
+                                💳 Cartão {% if order.card_type == 'credit' %}Crédito{% elif order.card_type == 'debit' %}Débito{% endif %}
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                                Online (MP)
+                            </span>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 dark:bg-gray-900 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+            {% if order.status == 'PENDING' or order.status == 'CONFIRMED' %}
+            <button hx-post="{% url 'update_status' order.id %}" hx-vals='{"status": "PREPARING"}'
+                hx-target="#modal-container"
+                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:w-auto sm:text-sm">
+                Confirmar Pedido
+            </button>
+            {% elif order.status == 'PREPARING' %}
+            <button hx-post="{% url 'update_status' order.id %}" hx-vals='{"status": "DELIVERING"}'
+                hx-target="#modal-container"
+                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:w-auto sm:text-sm">
+                Saiu para Entrega
+            </button>
+            {% elif order.status == 'DELIVERING' %}
+            <button hx-post="{% url 'update_status' order.id %}" hx-vals='{"status": "COMPLETED"}'
+                hx-target="#modal-container"
+                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none sm:w-auto sm:text-sm">
+                Concluir Entrega
+            </button>
+            {% endif %}
+
+            <button type="button"
+                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm"
+                onclick="document.getElementById('modal-container').innerHTML = ''">
+                Fechar
+            </button>
+        </div>
+    </div>
+</div>

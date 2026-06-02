@@ -1,0 +1,171 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Novo Pedido - {{ request.tenant.name }}{% endblock %}
+
+{% block content %}
+<div class="h-[calc(100vh-4rem)] flex flex-col">
+    <form method="post" class="flex-1 flex flex-col h-full bg-gray-50 dark:bg-gray-900 -m-8" id="pos-form">
+        {% csrf_token %}
+
+        <!-- Header: Customer Info -->
+        <div class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 px-8 py-4 z-10">
+            <div class="max-w-7xl mx-auto flex gap-4 items-center">
+                <div class="flex-1">
+                    <label for="customer_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome do Cliente /
+                        Mesa</label>
+                    <input type="text" name="customer_name" id="customer_name" required
+                        class="block w-full text-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Ex: João Silva ou Mesa 10">
+                </div>
+                <!-- Future: Table Number, Phone, etc -->
+            </div>
+        </div>
+
+        <!-- Category Pills (Sticky) -->
+        <div class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 px-8 py-3 sticky top-0 z-10">
+            <div class="max-w-7xl mx-auto flex space-x-2 overflow-x-auto scrollbar-hide" id="category-filters">
+                <button type="button" data-cat="all" onclick="filterCategory('all')"
+                    class="cat-btn px-4 py-2 rounded-full text-sm font-bold bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 transition-colors">
+                    Todos
+                </button>
+                {% for category in categories %}
+                <button type="button" data-cat="{{ category.id }}" onclick="filterCategory('{{ category.id }}')"
+                    class="cat-btn px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    {{ category.name }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Product Grid (Scrollable) -->
+        <div class="flex-1 overflow-y-auto p-8">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {% for product in products %}
+                <div class="product-card group bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col"
+                    data-category="{{ product.category.id }}">
+
+                    <!-- Image -->
+                    <div class="relative w-full pb-[50%] bg-gray-100 dark:bg-gray-700">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" class="absolute inset-0 w-full h-full object-cover">
+                        {% else %}
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-300">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-4 flex flex-col flex-1">
+                        <h3 class="font-bold text-gray-900 dark:text-gray-100 line-clamp-1 mb-1">{{ product.name }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-1 mb-3">{{ product.description|default:"" }}</p>
+
+                        <div class="mt-auto flex items-center justify-between">
+                            <span class="font-bold text-gray-900 dark:text-gray-100 text-lg">R$ {{ product.price }}</span>
+
+                            <!-- Qty Control -->
+                            <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                                <button type="button"
+                                    onclick="updateQty('qty_{{ product.id }}', -1, {{ product.price|stringformat:'f' }})"
+                                    class="w-8 h-8 flex items-center justify-center rounded bg-white dark:bg-gray-800 shadow-sm text-gray-600 dark:text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition">
+                                    -
+                                </button>
+                                <input type="number" name="quantity_{{ product.id }}" id="qty_{{ product.id }}"
+                                    value="0" readonly
+                                    class="w-10 text-center bg-transparent border-none text-gray-900 dark:text-gray-100 font-bold p-0 focus:ring-0">
+                                <button type="button"
+                                    onclick="updateQty('qty_{{ product.id }}', 1, {{ product.price|stringformat:'f' }})"
+                                    class="w-8 h-8 flex items-center justify-center rounded bg-white dark:bg-gray-800 shadow-sm text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition">
+                                    +
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Footer: Total & Submit -->
+        <div class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-6 shadow-lg z-20">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Total do Pedido</p>
+                    <p class="text-3xl font-bold text-gray-900 dark:text-gray-100" id="grand-total">R$ 0,00</p>
+                </div>
+                <div class="flex gap-4">
+                    <a href="{% url 'dashboard' %}"
+                        class="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-50 dark:hover:bg-gray-700">
+                        Cancelar
+                    </a>
+                    <button type="submit"
+                        class="px-8 py-3 bg-indigo-600 text-white rounded-lg font-bold shadow-md hover:bg-indigo-700 transition transform hover:-translate-y-0.5">
+                        Lançar Pedido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    let currentTotal = 0.0;
+
+    function filterCategory(catId) {
+        const cards = document.querySelectorAll('.product-card');
+        const btns = document.querySelectorAll('.cat-btn');
+
+        // Update Buttons
+        btns.forEach(btn => {
+            if (btn.dataset.cat === catId) {
+                btn.classList.remove('bg-gray-100', 'text-gray-600');
+                btn.classList.add('bg-gray-900', 'text-white');
+            } else {
+                btn.classList.remove('bg-gray-900', 'text-white');
+                btn.classList.add('bg-gray-100', 'text-gray-600');
+            }
+        });
+
+        // Filter Cards
+        cards.forEach(card => {
+            if (catId === 'all' || card.dataset.category === catId) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    function updateQty(id, change, price) {
+        const input = document.getElementById(id);
+        let val = parseInt(input.value) || 0;
+        let oldVal = val;
+
+        val += change;
+        if (val < 0) val = 0;
+
+        input.value = val;
+
+        // Visual Feedback on Card
+        const card = input.closest('.product-card');
+        if (val > 0) {
+            card.classList.add('ring-2', 'ring-indigo-500', 'border-transparent');
+        } else {
+            card.classList.remove('ring-2', 'ring-indigo-500', 'border-transparent');
+        }
+
+        // Update Total
+        const diff = val - oldVal;
+        currentTotal += diff * price;
+        // Fix float precision issues
+        if (currentTotal < 0) currentTotal = 0;
+
+        document.getElementById('grand-total').innerText =
+            'R$ ' + currentTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+</script>
+{% endblock %}

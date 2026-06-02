@@ -1,0 +1,16 @@
+{"ts":"2026-05-30T22:00:00Z","action":"T001","status":"done","files":["core/models.py"]}
+{"ts":"2026-05-30T22:01:00Z","action":"T002","status":"done","files":["core/migrations/0012_userprofile.py"]}
+{"ts":"2026-05-30T22:02:00Z","action":"T003","status":"done","files":["core/tests_checkout_ux.py"]}
+{"ts":"2026-05-30T22:02:00Z","action":"T004","status":"done","files":["core/tests_checkout_ux.py"]}
+{"ts":"2026-05-30T22:02:00Z","action":"T005","status":"done","files":["core/tests_checkout_ux.py"]}
+{"ts":"2026-05-30T22:03:00Z","action":"T006","status":"done","files":["core/views.py"]}
+{"ts":"2026-05-30T22:04:00Z","action":"T007","status":"done","files":["core/views.py"]}
+{"ts":"2026-05-30T22:05:00Z","action":"T008","status":"done","files":["core/views.py"]}
+{"ts":"2026-05-30T22:06:00Z","action":"T009","status":"done","files":["templates/core/partials/address_list.html"]}
+{"ts":"2026-05-30T22:07:00Z","action":"T010","status":"done","files":["templates/core/partials/cart_drawer.html"]}
+{"ts":"2026-05-30T22:08:00Z","action":"T011","status":"done","files":["templates/core/partials/address_list.html"]}
+{"ts":"2026-05-30T22:09:00Z","action":"T012","status":"done","files":["_reversa_forward/010-checkout-ux-cliente/regression-watch.md","_reversa_forward/010-checkout-ux-cliente/legacy-impact.md"]}
+{"ts":"2026-05-30T22:15:00Z","action":"T003","status":"corrected","note":"reset_current_tenant requer token; testes corrigidos"}
+{"ts":"2026-05-30T23:00:00Z","action":"EXTRA-01","status":"done","files":["accounts/forms.py","accounts/views.py"],"note":"Email obrigatorio no cadastro de cliente e loja"}
+{"ts":"2026-05-30T23:10:00Z","action":"EXTRA-02","status":"done","files":["templates/core/payment_pix.html"],"note":"Correcao scroll + placeholder QR Code"}
+{"ts":"2026-05-30T23:20:00Z","action":"EXTRA-03","status":"done","files":["core/views.py","core/urls.py"],"note":"payment_view + window.location redirect para evitar header duplicado no drawer"}

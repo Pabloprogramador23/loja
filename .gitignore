@@ -1,0 +1,7 @@
+# Env files com credenciais
+.env
+.env.prod
+
+# Reversa
+.reversa/config.user.toml
+_reversa_sdd/

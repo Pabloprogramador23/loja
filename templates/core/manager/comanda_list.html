@@ -1,0 +1,64 @@
+{% extends 'core/manager/base_manager.html' %}
+
+{% block manager_content %}
+<div class="p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Comandas Abertas</h1>
+    <button
+      class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg text-sm"
+      _="on click toggle .hidden on #form-nova-comanda"
+    >
+      + Nova Comanda
+    </button>
+  </div>
+
+  <div id="form-nova-comanda" class="hidden mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+    <form action="{% url 'comanda_create' %}" method="post" class="flex gap-3 items-end">
+      {% csrf_token %}
+      <div class="flex-1">
+        <label for="table_label" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Identificador da comanda</label>
+        <input
+          type="text"
+          id="table_label"
+          name="table_label"
+          placeholder="Ex: Mesa 3, Balcão, Delivery João"
+          class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          required
+        >
+      </div>
+      <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-md text-sm">
+        Criar
+      </button>
+    </form>
+    {% if error %}
+    <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+    {% endif %}
+  </div>
+
+  {% if comandas %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for comanda in comandas %}
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-start justify-between mb-3">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ comanda.table_label }}</h2>
+        <span class="text-xs bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 px-2 py-0.5 rounded-full">Aberta</span>
+      </div>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ comanda.items.count }} iten{{ comanda.items.count|pluralize:"s" }}</p>
+      <p class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-4">Total: R$ {{ comanda.total_amount }}</p>
+      <a
+        href="{% url 'comanda_detail' comanda.id %}"
+        class="block text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:hover:bg-indigo-900/60 dark:text-indigo-300 font-medium px-3 py-1.5 rounded-md text-sm transition-colors"
+      >
+        Gerenciar
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-16 text-gray-400 dark:text-gray-500">
+    <p class="text-lg">Nenhuma comanda aberta no momento.</p>
+    <p class="text-sm mt-1">Clique em "Nova Comanda" para começar.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

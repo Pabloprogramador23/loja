@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Pedido Confirmado{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto py-12 text-center">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+        <svg class="w-20 h-20 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Pedido confirmado!</h2>
+        <p class="text-gray-500 dark:text-gray-400 mb-2">
+            Seu pedido foi recebido e está sendo preparado.
+            {% if order %}<span class="font-medium text-gray-700 dark:text-gray-300">Pedido #{{ order.id }}</span>{% endif %}
+        </p>
+        {% if order %}
+        {% if not request.user.is_authenticated %}
+        <p class="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg px-3 py-2 mb-4">
+            Salve o link abaixo para acompanhar seu pedido — sem ele não será possível rastrear.
+        </p>
+        {% endif %}
+        <a href="{% url 'order_track' order.id %}"
+            class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-3 rounded-lg transition mb-4">
+            Acompanhar pedido #{{ order.id }}
+        </a>
+        <br>
+        {% endif %}
+        <a href="/" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Voltar ao início</a>
+    </div>
+</div>
+{% endblock %}
