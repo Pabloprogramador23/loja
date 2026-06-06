@@ -1,11 +1,11 @@
 {
   "schema-version": 1,
-  "feature-dir": "_reversa_forward/016-darkmode-fix",
-  "feature-id": "016",
-  "short-name": "darkmode-fix",
-  "started-at": "2026-06-01T00:00:00Z",
-  "current-stage": "requirements",
-  "stages-completed": [],
+  "feature-dir": "_reversa_forward/023-painel-saas-admin",
+  "feature-id": "023",
+  "short-name": "painel-saas-admin",
+  "started-at": "2026-06-05T00:00:00Z",
+  "current-stage": "done",
+  "stages-completed": ["requirements", "plan", "to-do", "coding"],
   "paused-features": [
     {
       "feature-dir": "_reversa_forward/002-cadastro-loja-saas",
@@ -18,23 +18,23 @@
       "paused-from-stage": "done"
     },
     {
-      "feature-dir": "_reversa_forward/012-auth-social-checkout",
-      "feature-id": "012",
-      "short-name": "auth-social-checkout",
-      "started-at": "2026-05-30T23:45:00Z",
-      "current-stage": "done",
-      "stages-completed": ["requirements", "plan", "to-do", "coding"],
-      "paused-at": "2026-05-31T00:30:00Z",
-      "paused-from-stage": "done"
+      "feature-dir": "_reversa_forward/016-darkmode-fix",
+      "feature-id": "016",
+      "short-name": "darkmode-fix",
+      "started-at": "2026-06-01T00:00:00Z",
+      "current-stage": "requirements",
+      "stages-completed": [],
+      "paused-at": "2026-06-02T00:00:00Z",
+      "paused-from-stage": "requirements"
     },
     {
-      "feature-dir": "_reversa_forward/013-checkout-pro-mp",
-      "feature-id": "013",
-      "short-name": "checkout-pro-mp",
-      "started-at": "2026-05-31T00:30:00Z",
+      "feature-dir": "_reversa_forward/021-remover-criar-loja",
+      "feature-id": "021",
+      "short-name": "remover-criar-loja",
+      "started-at": "2026-06-05T00:00:00Z",
       "current-stage": "done",
       "stages-completed": ["requirements", "plan", "to-do", "coding"],
-      "paused-at": "2026-05-31T01:30:00Z",
+      "paused-at": "2026-06-05T01:00:00Z",
       "paused-from-stage": "done"
     }
   ]

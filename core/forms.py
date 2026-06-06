@@ -68,7 +68,7 @@ PASSWORD_INPUT_CLASS = INPUT_CLASS
 class StoreSettingsForm(forms.ModelForm):
     class Meta:
         model = Store
-        fields = ['name', 'logo', 'cover_image', 'mercadopago_access_token', 'delivery_fee', 'free_delivery_threshold']
+        fields = ['name', 'logo', 'cover_image', 'mercadopago_access_token', 'delivery_fee', 'free_delivery_threshold', 'delivery_enabled']
         labels = {
             'name': 'Nome da Loja',
             'logo': 'Logotipo',
@@ -76,6 +76,7 @@ class StoreSettingsForm(forms.ModelForm):
             'mercadopago_access_token': 'Token de Acesso (Mercado Pago)',
             'delivery_fee': 'Taxa de entrega (R$)',
             'free_delivery_threshold': 'Entrega grátis acima de (R$)',
+            'delivery_enabled': 'Aceitar pedidos online',
         }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400'}),
@@ -84,6 +85,7 @@ class StoreSettingsForm(forms.ModelForm):
             'cover_image': forms.FileInput(attrs={'class': 'mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100'}),
             'delivery_fee': forms.NumberInput(attrs={'step': '0.01', 'min': '0', 'class': 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400'}),
             'free_delivery_threshold': forms.NumberInput(attrs={'step': '0.01', 'min': '0', 'class': 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400', 'id': 'id_free_delivery_threshold'}),
+            'delivery_enabled': forms.CheckboxInput(attrs={'class': 'h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700'}),
         }
 
     def clean_free_delivery_threshold(self):
@@ -91,3 +93,66 @@ class StoreSettingsForm(forms.ModelForm):
         if value == '' or value is None:
             return None
         return value
+
+
+class SaasCreateStoreForm(forms.Form):
+    store_name = forms.CharField(
+        max_length=255,
+        label='Nome da loja',
+        widget=forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Ex: Pizza do João'}),
+    )
+    subdomain = forms.SlugField(
+        max_length=255,
+        label='Subdomínio',
+        widget=forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Ex: pizzadojoao'}),
+        help_text='Apenas letras minúsculas, números e hífens. Sem espaços.',
+    )
+    manager_email = forms.EmailField(
+        label='E-mail do gerente',
+        widget=forms.EmailInput(attrs={'class': INPUT_CLASS, 'placeholder': 'gerente@email.com'}),
+    )
+    manager_password = forms.CharField(
+        label='Senha do gerente',
+        widget=forms.PasswordInput(attrs={'class': INPUT_CLASS}),
+        min_length=8,
+    )
+
+    def clean_subdomain(self):
+        subdomain = self.cleaned_data['subdomain']
+        if Store.objects.filter(subdomain=subdomain).exists():
+            raise forms.ValidationError('Este subdomínio já está em uso.')
+        return subdomain
+
+    def clean_manager_email(self):
+        from django.contrib.auth.models import User
+        email = self.cleaned_data['manager_email']
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('Este e-mail já está cadastrado.')
+        return email
+
+    def save(self):
+        from django.contrib.auth.models import User
+        from django.db import transaction
+
+        email = self.cleaned_data['manager_email']
+        base_username = email.split('@')[0]
+        username = base_username
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f'{base_username}{counter}'
+            counter += 1
+
+        with transaction.atomic():
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=self.cleaned_data['manager_password'],
+                is_staff=True,
+            )
+            store = Store.objects.create(
+                name=self.cleaned_data['store_name'],
+                subdomain=self.cleaned_data['subdomain'],
+                owner=user,
+                is_active=True,
+            )
+        return store

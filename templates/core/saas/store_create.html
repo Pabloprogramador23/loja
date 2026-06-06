@@ -1,0 +1,90 @@
+{% extends "core/saas/saas_base.html" %}
+
+{% block title %}Nova Loja — Painel SaaS{% endblock %}
+
+{% block content %}
+<div class="max-w-lg">
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'saas_dashboard' %}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </a>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Nova Loja</h2>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="space-y-4">
+                <!-- Nome da loja -->
+                <div>
+                    <label for="{{ form.store_name.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ form.store_name.label }}
+                    </label>
+                    {{ form.store_name }}
+                    {% if form.store_name.errors %}
+                    <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ form.store_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Subdomínio -->
+                <div>
+                    <label for="{{ form.subdomain.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ form.subdomain.label }}
+                    </label>
+                    {{ form.subdomain }}
+                    {% if form.subdomain.help_text %}
+                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ form.subdomain.help_text }}</p>
+                    {% endif %}
+                    {% if form.subdomain.errors %}
+                    <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ form.subdomain.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <hr class="border-gray-100 dark:border-gray-700">
+
+                <!-- E-mail do gerente -->
+                <div>
+                    <label for="{{ form.manager_email.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ form.manager_email.label }}
+                    </label>
+                    {{ form.manager_email }}
+                    {% if form.manager_email.errors %}
+                    <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ form.manager_email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Senha -->
+                <div>
+                    <label for="{{ form.manager_password.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ form.manager_password.label }}
+                    </label>
+                    {{ form.manager_password }}
+                    {% if form.manager_password.errors %}
+                    <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ form.manager_password.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 mt-6">
+                <button type="submit"
+                    class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    Criar loja
+                </button>
+                <a href="{% url 'saas_dashboard' %}"
+                    class="px-4 py-2 text-gray-600 dark:text-gray-300 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

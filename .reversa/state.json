@@ -16,6 +16,46 @@
     "geracao"
   ],
   "pending": [],
+  "session_2026_06_01": {
+    "date": "2026-06-01",
+    "summary": "Sessão de bugfixes e melhorias de UX pós-lançamento",
+    "completed": [
+      "B-01: cart.clear() corrigido — itens não persistem após pedido",
+      "B-02: _checkout_error() criado — contexto de endereços preservado no erro",
+      "B-03: auto-select do primeiro endereço salvo no carrinho",
+      "B-04: dark mode travado como contorno — botão removido, classe dark fixada",
+      "M-01: tela de sucesso exibe link de rastreio para guest (order_id na URL + sessão)",
+      "M-02: formulário de endereço estruturado removido do carrinho — textarea livre para todos",
+      "F-01: botões de status completos no dashboard (CONFIRMED→PREPARAR, Cancelar) + polling 10s",
+      "F-02: view order_print + template de comanda de entrega"
+    ],
+    "pending_backlog": [
+      "016-darkmode-fix: toggle funcional definitivo (Tailwind CDN vs NPM)",
+      "I-01: integração real com MercadoPago (credenciais sandbox)"
+    ],
+    "active_feature": "016-darkmode-fix",
+    "docker_state": "rodando — loja-web-1, loja-worker-1, loja-db-1, loja-redis-1 na porta 8000"
+  },
+  "session_2026_06_04b": {
+    "date": "2026-06-04",
+    "summary": "Teste e validação das features 018 e 019 com ngrok + MercadoPago real",
+    "completed": [
+      "018-mp-ux-checkout: testada e validada — fluxo completo (carrinho → checkout → MP → pedido PREPARANDO)",
+      "019-toggle-delivery: já estava validada, confirmada sem regressão",
+      "FIX-01: window.open revertido — MP Checkout Pro não suporta new tab via window.open programático",
+      "FIX-02: TenantMiddleware atualizado — domínios ngrok reconhecidos como dev (evita 404 no back_url)",
+      "FIX-03: ALLOWED_HOSTS atualizado no .env para incluir domínio ngrok",
+      "FIX-04: CSRF_TRUSTED_ORIGINS adicionado ao settings.py (gerado dinamicamente do ALLOWED_HOSTS)",
+      "FIX-05: payment_success_view atualiza pedido para PREPARING como fallback quando webhook atrasa"
+    ],
+    "pending_backlog": [
+      "016-darkmode-fix: toggle funcional definitivo (Tailwind CDN vs NPM)",
+      "webhook-mp: configurar URL no painel MP para /api/webhooks/mercadopago"
+    ],
+    "docker_state": "rodando — loja-web-1, loja-worker-1, loja-db-1, loja-redis-1 na porta 8000",
+    "ngrok_state": "rodando — C:\\ngrok\\ngrok.exe http 8000 → https://maggot-unstitch-maimed.ngrok-free.dev",
+    "feature_020": "020-bugfix-pedidos-hoje — concluída ✅ — timezone.localdate() corrige Pedidos Hoje após 21h"
+  },
   "re_extractions": [
     {
       "date": "2026-05-29T17:00:00Z",

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Aguardando Pagamento{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto py-12 text-center">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+
+        {% if order %}
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Pedido <span class="font-semibold text-gray-700 dark:text-gray-200">#{{ order.id }}</span></p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Total: <span class="font-medium">R$ {{ order.total_amount }}</span></p>
+        {% endif %}
+
+        <!-- Área de status — atualizada pelo polling HTMX -->
+        <div id="waiting-status"
+            {% if order %}
+            hx-get="{% url 'payment_waiting_status' %}?order_id={{ order.id }}"
+            hx-trigger="every 5s, stopPolling from:body"
+            hx-target="#waiting-status"
+            hx-swap="innerHTML"
+            {% endif %}>
+            {% include "core/partials/payment_waiting_status.html" %}
+        </div>
+
+        <div class="mt-6 space-y-2">
+            {% if order %}
+            <a href="{% url 'order_track' order.id %}"
+               class="block text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+                Ver status do pedido #{{ order.id }} →
+            </a>
+            {% endif %}
+            <a href="/" class="block text-sm text-gray-400 dark:text-gray-500 hover:underline">Voltar ao início</a>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var TIMEOUT_MS = 600000; // 10 minutos
+    var warningShown = false;
+
+    function showTimeoutWarning() {
+        if (warningShown) return;
+        warningShown = true;
+        var el = document.getElementById('waiting-status');
+        if (el) {
+            var warning = document.createElement('p');
+            warning.className = 'text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg px-3 py-2 mt-4';
+            warning.textContent = 'Não recebemos confirmação do MercadoPago. Se você já pagou, aguarde alguns instantes — o status atualiza automaticamente.';
+            el.appendChild(warning);
+        }
+    }
+
+    var timer = setTimeout(showTimeoutWarning, TIMEOUT_MS);
+
+    // Para o timer quando o polling encerrar (status mudou)
+    document.body.addEventListener('stopPolling', function() {
+        clearTimeout(timer);
+    });
+})();
+</script>
+{% endblock %}

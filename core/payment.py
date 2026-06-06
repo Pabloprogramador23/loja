@@ -1,5 +1,8 @@
+import logging
 import mercadopago
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 def create_checkout_pro_preference(order):
@@ -20,7 +23,11 @@ def create_checkout_pro_preference(order):
             "preference_id": mock_pref_id,
         }
 
-    site_url = getattr(settings, 'SITE_URL', 'http://localhost:8000').rstrip('/')
+    platform_domain = getattr(settings, 'PLATFORM_DOMAIN', '')
+    if platform_domain:
+        site_url = f"https://{order.store.subdomain}.{platform_domain}"
+    else:
+        site_url = getattr(settings, 'SITE_URL', 'http://localhost:8000').rstrip('/')
     items = [
         {
             "id": str(item.product.id),
@@ -32,11 +39,18 @@ def create_checkout_pro_preference(order):
         for item in order.items.all()
     ]
 
+    payer_email = order.customer_email or (order.user.email if order.user else '')
+    payer_name = (
+        (order.user.get_full_name() or order.user.username)
+        if order.user
+        else order.customer_name
+    )
+
     preference_data = {
         "items": items,
         "payer": {
-            "email": order.user.email,
-            "name": order.user.get_full_name() or order.user.username,
+            "email": payer_email,
+            "name": payer_name,
         },
         "back_urls": {
             "success": f"{site_url}/payment/success/",
@@ -52,7 +66,7 @@ def create_checkout_pro_preference(order):
     result = sdk.preference().create(preference_data)
 
     if result.get("status") == 403 or result.get("status") != 201:
-        print(f"MP Preference Error {result.get('status')}: {result.get('response')}")
+        logger.error("MP Preference Error %s: %s", result.get('status'), result.get('response'))
         # Fallback mock
         mock_pref_id = f"MOCK_PREF_{order.id}"
         order.mp_preference_id = mock_pref_id
@@ -82,26 +96,8 @@ def create_pix_payment(order, customer_email=None):
         else settings.MERCADOPAGO_ACCESS_TOKEN
     )
 
-    payer_email = customer_email or (order.user.email if order.user and order.user.email else None)
-    if not payer_email:
-        print("⚠️ PIX: nenhum email de pagador disponível")
-        payer_email = "guest@placeholder.invalid"
-
-    sdk = mercadopago.SDK(token)
-
-    payment_data = {
-        "transaction_amount": float(order.total_amount),
-        "description": f"Pedido #{order.id} - {order.store.name}",
-        "payment_method_id": "pix",
-        "payer": {"email": payer_email},
-        "external_reference": str(order.id),
-    }
-
-    result = sdk.payment().create(payment_data)
-    response = result.get("response", {})
-
-    # Mock para desenvolvimento quando token dummy ou MP retorna erro
-    if result.get("status") == 403 or token.startswith("TEST-0000"):
+    # Mock para desenvolvimento — apenas quando token dummy. Nunca ativa com token real.
+    if token.startswith("TEST-0000"):
         mock_id = f"MOCK_{order.id}"
         order.mp_payment_id = mock_id
         order.save(update_fields=["mp_payment_id"])
@@ -113,8 +109,28 @@ def create_pix_payment(order, customer_email=None):
             "status": "pending",
         }
 
+    payer_email = (
+        order.customer_email
+        or customer_email
+        or (order.user.email if order.user and order.user.email else None)
+    )
+    if not payer_email:
+        payer_email = "guest@placeholder.invalid"
+
+    sdk = mercadopago.SDK(token)
+
+    payment_data = {
+        "transaction_amount": str(order.total_amount),
+        "description": f"Pedido #{order.id} - {order.store.name}",
+        "payment_method_id": "pix",
+        "payer": {"email": payer_email},
+        "external_reference": str(order.id),
+    }
+
+    result = sdk.payment().create(payment_data)
+    response = result.get("response", {})
+
     if result.get("status") != 201:
-        print(f"MP Error {result.get('status')}: {response}")
         return None
 
     payment_id = response.get("id")

@@ -19,8 +19,16 @@ class TenantMiddleware:
         except ValueError:
             is_ip = False
 
+        dev_host = (
+            'localhost' in hostname
+            or '127.0.0.1' in hostname
+            or hostname.endswith('.ngrok-free.dev')
+            or hostname.endswith('.ngrok-free.app')
+            or hostname.endswith('.ngrok.io')
+        )
+
         # 1. Host-based resolution — production (e.g. loja-a.meusaas.com)
-        if not is_ip and len(parts) >= 3:
+        if not is_ip and not dev_host and len(parts) >= 3:
             subdomain = parts[0]
             try:
                 tenant = Store.objects.get(subdomain=subdomain, is_active=True)
@@ -38,7 +46,7 @@ class TenantMiddleware:
                     pass
 
         # 3. Localhost/dev fallback — prefer the authenticated user's own store
-        if not tenant and ('localhost' in hostname or '127.0.0.1' in hostname):
+        if not tenant and (is_ip or dev_host):
             if hasattr(request, 'user') and request.user.is_authenticated:
                 tenant = getattr(request.user, 'owned_store', None)
             if not tenant:

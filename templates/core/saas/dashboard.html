@@ -1,0 +1,90 @@
+{% extends "core/saas/saas_base.html" %}
+
+{% block title %}Painel SaaS — Todas as Lojas{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Todas as Lojas</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Visão global do sistema SaaS</p>
+    </div>
+    <a href="{% url 'saas_store_create' %}"
+        class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Nova Loja
+    </a>
+</div>
+
+<!-- Contadores -->
+<div class="grid grid-cols-2 gap-4 mb-6">
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+        <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Lojas Ativas</p>
+        <p class="text-3xl font-bold text-green-600 dark:text-green-400 mt-1">{{ active_count }}</p>
+    </div>
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+        <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Lojas Inativas</p>
+        <p class="text-3xl font-bold text-gray-400 dark:text-gray-500 mt-1">{{ inactive_count }}</p>
+    </div>
+</div>
+
+<!-- Tabela de lojas -->
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    {% if stores %}
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                <th class="px-5 py-3">Loja</th>
+                <th class="px-5 py-3">Subdomínio</th>
+                <th class="px-5 py-3">Status</th>
+                <th class="px-5 py-3 text-center">Pedidos Hoje</th>
+                <th class="px-5 py-3 text-center">Total de Pedidos</th>
+                <th class="px-5 py-3">Criada em</th>
+                <th class="px-5 py-3">Ações</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            {% for store in stores %}
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                <td class="px-5 py-4">
+                    <a href="{% url 'saas_store_detail' store.pk %}" class="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400">
+                        {{ store.name }}
+                    </a>
+                    {% if store.owner %}
+                    <p class="text-xs text-gray-400 dark:text-gray-500">{{ store.owner.email }}</p>
+                    {% endif %}
+                </td>
+                <td class="px-5 py-4 text-gray-600 dark:text-gray-300 font-mono text-xs">{{ store.subdomain }}</td>
+                <td class="px-5 py-4">
+                    <div id="toggle-{{ store.pk }}">
+                        {% include "core/saas/partials/store_toggle.html" %}
+                    </div>
+                </td>
+                <td class="px-5 py-4 text-center font-semibold text-gray-700 dark:text-gray-200">{{ store.orders_today }}</td>
+                <td class="px-5 py-4 text-center text-gray-500 dark:text-gray-400">{{ store.total_orders }}</td>
+                <td class="px-5 py-4 text-gray-500 dark:text-gray-400 text-xs">{{ store.created_at|date:"d/m/Y" }}</td>
+                <td class="px-5 py-4">
+                    <div class="flex items-center gap-2">
+                        <a href="{% url 'saas_store_detail' store.pk %}"
+                            class="px-3 py-1 text-xs font-medium rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                            Detalhes
+                        </a>
+                        <a href="http://{{ store.subdomain }}.localhost:8000/" target="_blank"
+                            class="px-3 py-1 text-xs font-medium rounded bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
+                            Ver loja ↗
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="px-5 py-12 text-center text-gray-400 dark:text-gray-500">
+        <p class="text-lg">Nenhuma loja cadastrada ainda.</p>
+        <a href="{% url 'saas_store_create' %}" class="mt-3 inline-block text-indigo-600 dark:text-indigo-400 hover:underline text-sm">Criar a primeira loja →</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

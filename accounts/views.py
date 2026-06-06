@@ -2,36 +2,10 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout
 from django.contrib.auth.forms import AuthenticationForm
-from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 
-
-def criar_loja_view(request):
-    if request.user.is_authenticated:
-        return redirect('index')
-
-    from .forms import StoreRegistrationForm
-    from core.models import Store
-
-    if request.method == 'POST':
-        form = StoreRegistrationForm(request.POST)
-        if form.is_valid():
-            with transaction.atomic():
-                user = form.save()
-                Store.objects.create(
-                    name=form.cleaned_data['store_name'],
-                    subdomain=form.cleaned_data['subdomain'],
-                    owner=user,
-                    is_active=True,
-                )
-            auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return redirect('dashboard')
-    else:
-        form = StoreRegistrationForm()
-
-    return render(request, 'accounts/criar_loja.html', {'form': form})
 
 
 def signup_view(request):

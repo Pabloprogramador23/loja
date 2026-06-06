@@ -7,11 +7,20 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
         <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Pagamento em processamento</h2>
-        <p class="text-gray-500 dark:text-gray-400 mb-6">
-            Seu pagamento está sendo processado. Se você pagou via PIX, pode levar alguns instantes para confirmar.
-            Você receberá uma notificação por e-mail quando for aprovado.
+        <p class="text-gray-500 dark:text-gray-400 mb-4">
+            Seu pagamento está sendo processado. Se você pagou, pode levar alguns instantes para confirmar.
         </p>
-        <a href="/" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-3 rounded-lg transition">
+        {% if order %}
+        <p class="text-xs text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg px-3 py-2 mb-4">
+            Pedido <span class="font-semibold">#{{ order.id }}</span> registrado. Acompanhe o status pelo link abaixo.
+        </p>
+        <a href="{% url 'order_track' order.id %}"
+           class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-3 rounded-lg transition mb-3">
+            Acompanhar pedido #{{ order.id }}
+        </a>
+        <br>
+        {% endif %}
+        <a href="/" class="{% if order %}text-sm text-gray-400 dark:text-gray-500 hover:underline{% else %}inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-3 rounded-lg transition{% endif %}">
             Voltar ao início
         </a>
     </div>

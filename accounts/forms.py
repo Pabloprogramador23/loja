@@ -1,18 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django.core.validators import RegexValidator
-
-RESERVED_SUBDOMAINS = {
-    'www', 'api', 'admin', 'mail', 'smtp', 'ftp',
-    'catalog', 'checkout', 'cart', 'dashboard',
-    'account', 'order', 'orders', 'static', 'media',
-}
-
-subdomain_validator = RegexValidator(
-    regex=r'^[a-z0-9]([a-z0-9-]*[a-z0-9])?$',
-    message='Use apenas letras minúsculas, números e hífens. Não pode começar ou terminar com hífen.',
-)
 
 
 class CustomerSignupForm(UserCreationForm):
@@ -66,41 +54,3 @@ class CheckoutSignupForm(UserCreationForm):
         if commit:
             user.save()
         return user
-
-
-class StoreRegistrationForm(UserCreationForm):
-    email = forms.EmailField(
-        required=True,
-        label='E-mail',
-    )
-    store_name = forms.CharField(
-        max_length=255,
-        label='Nome da loja',
-    )
-    subdomain = forms.CharField(
-        max_length=100,
-        min_length=3,
-        label='Subdomínio',
-        validators=[subdomain_validator],
-        help_text='Mínimo 3 caracteres. Apenas letras minúsculas, números e hífens.',
-    )
-
-    class Meta(UserCreationForm.Meta):
-        model = User
-        fields = ('username', 'email', 'password1', 'password2', 'store_name', 'subdomain')
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.email = self.cleaned_data['email']
-        if commit:
-            user.save()
-        return user
-
-    def clean_subdomain(self):
-        from core.models import Store
-        subdomain = self.cleaned_data.get('subdomain', '').lower().strip()
-        if subdomain in RESERVED_SUBDOMAINS:
-            raise forms.ValidationError('Subdomínio reservado. Escolha outro nome.')
-        if Store.objects.filter(subdomain=subdomain).exists():
-            raise forms.ValidationError('Este subdomínio já está em uso.')
-        return subdomain

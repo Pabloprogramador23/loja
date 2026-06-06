@@ -1,7 +1,10 @@
 {% extends 'core/manager/base_manager.html' %}
 
 {% block manager_content %}
-<h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Visão Geral</h1>
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Visão Geral</h1>
+    {% include 'core/manager/partials/delivery_toggle.html' %}
+</div>
 
 <div class="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-3">
     <!-- Stat Card 1 -->

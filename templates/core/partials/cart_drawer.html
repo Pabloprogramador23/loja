@@ -10,6 +10,12 @@
     </div>
 
     <div class="flex-1 p-4">
+        {% if not delivery_enabled %}
+        <div class="mx-4 mt-4 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg px-4 py-3 text-sm text-amber-800 dark:text-amber-200 font-medium text-center">
+            ⏸ A loja não está aceitando pedidos no momento.
+        </div>
+        {% endif %}
+
         {% if cart|length > 0 %}
         <ul class="divide-y divide-gray-200 dark:divide-gray-700 mb-6">
             {% for item in cart %}
@@ -42,43 +48,17 @@
             </button>
         </div>
 
-        {% if request.user.is_authenticated %}
-        <!-- Address Management -->
-        <div class="mb-6 bg-white dark:bg-gray-800 p-3 rounded shadow-sm border border-gray-100 dark:border-gray-700">
+        {% if request.user.is_authenticated and addresses %}
+        <!-- Endereços salvos -->
+        <div class="mb-4">
             <div class="flex justify-between items-center mb-2">
-                <h3 class="font-bold text-gray-700 dark:text-gray-200 text-sm">Meus Endereços (Max 3)</h3>
-                <button _="on click toggle .hidden on #add-address-form"
-                    class="text-xs text-blue-600 dark:text-blue-400 font-bold hover:underline">+ Novo Endereço</button>
+                <h3 class="font-bold text-gray-700 dark:text-gray-200 text-sm">Endereços salvos</h3>
+                <a href="{% url 'account_addresses' %}" target="_blank"
+                    class="text-xs text-indigo-500 dark:text-indigo-400 hover:underline">Gerenciar →</a>
             </div>
-
             <div id="saved-addresses-list" class="space-y-2">
                 {% include 'core/partials/address_list.html' %}
             </div>
-
-            <!-- Add Form -->
-            <form id="add-address-form" class="hidden bg-gray-50 dark:bg-gray-900 p-3 rounded mt-2 space-y-2 border border-gray-200 dark:border-gray-700"
-                hx-post="{% url 'save_address' %}" hx-target="#saved-addresses-list"
-                _="on htmx:afterOnLoad add .hidden to me then reset() me">
-                {% csrf_token %}
-                <input name="street" placeholder="Rua" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 p-1" required>
-                <div class="flex space-x-2">
-                    <input name="number" placeholder="Nº" class="w-1/3 text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 p-1" required>
-                    <input name="neighborhood" placeholder="Bairro" class="w-2/3 text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 p-1"
-                        required>
-                </div>
-                <div class="flex space-x-2">
-                    <input name="city" placeholder="Cidade" class="w-2/3 text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 p-1" required>
-                    <input name="state" placeholder="UF" class="w-1/3 text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 p-1" required>
-                </div>
-                <input name="zip_code" placeholder="CEP" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 p-1">
-                <div class="flex justify-between items-center pt-2">
-                    <button type="button" _="on click add .hidden to #add-address-form"
-                        class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">Cancelar</button>
-                    <button type="submit"
-                        class="bg-blue-600 text-white text-xs px-3 py-1 rounded hover:bg-blue-700">Salvar
-                        Endereço</button>
-                </div>
-            </form>
         </div>
         {% endif %}
 
@@ -105,16 +85,8 @@
                 </div>
                 {% endif %}
                 <div>
-                    {% if request.user.is_authenticated and addresses %}
-                    <button type="button"
-                        id="toggle-other-address"
-                        _="on click remove .hidden from #delivery-address-textarea then add .hidden to me"
-                        class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline mb-1">
-                        + Outro endereço
-                    </button>
-                    {% endif %}
-                    <textarea name="delivery_address" id="delivery-address-textarea" placeholder="Endereço Completo" rows="2" required
-                        class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm p-2 text-sm {% if request.user.is_authenticated and addresses %}hidden{% endif %}">{{ request.POST.delivery_address|default:session_delivery_address }}</textarea>
+                    <textarea name="delivery_address" id="delivery-address-textarea" placeholder="Endereço de entrega" rows="2" required
+                        class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm p-2 text-sm">{{ request.POST.delivery_address|default:session_delivery_address }}</textarea>
                 </div>
 
                 <!-- Error Container -->
@@ -222,8 +194,10 @@
                     </div>
 
                     <button type="submit"
-                        class="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-green-600 hover:bg-green-700 transition relative">
-                        Confirmar Pedido
+                        {% if not delivery_enabled %}disabled{% endif %}
+                        class="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white transition relative
+                               {% if delivery_enabled %}bg-green-600 hover:bg-green-700{% else %}bg-gray-400 dark:bg-gray-600 cursor-not-allowed{% endif %}">
+                        {% if delivery_enabled %}Confirmar Pedido{% else %}Loja fechada{% endif %}
                     </button>
                 </div>
             </form>

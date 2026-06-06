@@ -33,6 +33,7 @@ def cart(request):
         'effective_delivery_fee': effective_delivery_fee,
         'cart_total_with_fee': cart_total_with_fee,
         'threshold_gap': threshold_gap,
+        'delivery_enabled': tenant.delivery_enabled if tenant else True,
     }
 
 def theme_preference(request):

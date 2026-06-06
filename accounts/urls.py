@@ -3,8 +3,7 @@ from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
-    path('criar-loja/', views.criar_loja_view, name='criar_loja'),
-    path('signup/', views.signup_view, name='signup'),
+path('signup/', views.signup_view, name='signup'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     # Modal de auth no checkout

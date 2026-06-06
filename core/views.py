@@ -29,14 +29,6 @@ def index(request):
     Renderiza a página inicial.
     O tenant já está em request.tenant (via TenantMiddleware).
     """
-    print("--- INDEX VIEW ---")
-    print("User:", request.user)
-    print("Is Authenticated:", request.user.is_authenticated)
-    print("Is Staff:", request.user.is_staff)
-    print("Tenant:", request.tenant)
-    if request.user.is_authenticated:
-        print("Owned Store:", getattr(request.user, 'owned_store', None))
-        print("Match:", getattr(request.user, 'owned_store', None) == request.tenant)
     return render(request, 'core/index.html', {
         'categories': Category.objects.all(),
         'featured_products': Product.objects.filter(is_available=True).order_by('?')[:4]
@@ -157,7 +149,11 @@ def delete_address(request, address_id):
 
 def _checkout_error(request, cart, error):
     """Renderiza o drawer com erro mantendo contexto de endereços para usuários logados."""
-    ctx = {'cart': cart, 'error': error}
+    ctx = {
+        'cart': cart,
+        'error': error,
+        'session_delivery_address': request.session.get('session_delivery_address', ''),
+    }
     if request.user.is_authenticated:
         ctx['addresses'] = Address.objects.filter(user=request.user)
         profile, _ = UserProfile.objects.get_or_create(user=request.user)
@@ -168,6 +164,11 @@ def _checkout_error(request, cart, error):
 @require_POST
 def checkout(request):
     cart = Cart(request)
+
+    store = request.tenant
+    if store and not store.delivery_enabled:
+        return _checkout_error(request, cart, 'A loja não está aceitando pedidos no momento.')
+
     if len(cart) == 0:
         return _checkout_error(request, cart, 'Carrinho vazio')
 
@@ -230,6 +231,7 @@ def checkout(request):
         order = Order.objects.create(
             customer_name=name,
             customer_phone=phone,
+            customer_email=customer_email,
             delivery_address=address,
             total_amount=subtotal + effective_fee,
             delivery_fee=effective_fee,
@@ -291,6 +293,13 @@ def payment_success_view(request):
         order_id = request.GET.get('order_id') or request.session.get('guest_order_id')
         if order_id:
             order = Order.objects.filter(id=order_id).first()
+
+    # Fallback: se o webhook ainda não chegou, atualiza o pedido aqui mesmo
+    if order and status == 'approved' and order.status == Order.Status.PENDING:
+        from core.api import update_paid_order
+        update_paid_order(order.id)
+        order.refresh_from_db()
+
     return render(request, 'core/payment_success.html', {
         'payment_id': payment_id,
         'preference_id': preference_id,
@@ -301,12 +310,57 @@ def payment_success_view(request):
 
 def payment_pending_view(request):
     payment_id = request.GET.get('payment_id', '')
-    return render(request, 'core/payment_pending.html', {'payment_id': payment_id})
+    preference_id = request.GET.get('preference_id', '')
+    external_reference = request.GET.get('external_reference', '')
+    order = None
+    if preference_id:
+        order = Order.objects.filter(mp_preference_id=preference_id).first()
+    if order is None and external_reference:
+        order = Order.objects.filter(id=external_reference).first()
+    if order is None:
+        order_id = request.GET.get('order_id') or request.session.get('guest_order_id')
+        if order_id:
+            order = Order.objects.filter(id=order_id).first()
+    if order is None:
+        logger.warning('018 payment_pending order not found: preference_id=%s ext=%s', preference_id, external_reference)
+    return render(request, 'core/payment_pending.html', {'payment_id': payment_id, 'order': order})
 
 
 def payment_failure_view(request):
     payment_id = request.GET.get('payment_id', '')
-    return render(request, 'core/payment_failure.html', {'payment_id': payment_id})
+    preference_id = request.GET.get('preference_id', '')
+    external_reference = request.GET.get('external_reference', '')
+    order = None
+    if preference_id:
+        order = Order.objects.filter(mp_preference_id=preference_id).first()
+    if order is None and external_reference:
+        order = Order.objects.filter(id=external_reference).first()
+    if order is None:
+        order_id = request.GET.get('order_id') or request.session.get('guest_order_id')
+        if order_id:
+            order = Order.objects.filter(id=order_id).first()
+    if order is None:
+        logger.warning('018 payment_failure order not found: preference_id=%s ext=%s', preference_id, external_reference)
+    return render(request, 'core/payment_failure.html', {'payment_id': payment_id, 'order': order})
+
+
+def payment_waiting_view(request):
+    order_id = request.GET.get('order_id') or request.session.get('guest_order_id')
+    order = None
+    if order_id:
+        order = Order.objects.filter(id=order_id).first()
+    return render(request, 'core/payment_waiting.html', {'order': order})
+
+
+def payment_waiting_status_view(request):
+    order_id = request.GET.get('order_id') or request.session.get('guest_order_id')
+    order = None
+    if order_id:
+        order = Order.objects.filter(id=order_id).first()
+    response = render(request, 'core/partials/payment_waiting_status.html', {'order': order})
+    if order and order.status != Order.Status.PENDING:
+        response['HX-Trigger'] = 'stopPolling'
+    return response
 
 
 def payment_mock_view(request):
@@ -333,7 +387,7 @@ def dashboard(request):
     from django.db.models import Sum, Count
     from django.utils import timezone
     
-    today = timezone.now().date()
+    today = timezone.localdate()
     
     # Stats
     total_orders_pending = Order.objects.filter(
@@ -501,6 +555,18 @@ def manager_settings(request):
         form = StoreSettingsForm(instance=tenant)
 
     return render(request, 'core/manager/settings.html', {'form': form})
+
+@require_POST
+@login_required
+def toggle_delivery_view(request):
+    if not user_can_manage_store(request):
+        return HttpResponse(status=403)
+    store = request.tenant
+    store.delivery_enabled = not store.delivery_enabled
+    store.save(update_fields=['delivery_enabled'])
+    logger.info('Store %s delivery_enabled set to %s by user %s', store.id, store.delivery_enabled, request.user)
+    return render(request, 'core/manager/partials/delivery_toggle.html', {'delivery_enabled': store.delivery_enabled})
+
 
 def cancel_order_on_pix_expiry(order_id):
     """Cancela pedido PENDING quando PIX expira no MercadoPago (chamado pelo webhook)."""

@@ -1,0 +1,133 @@
+{% extends "core/saas/saas_base.html" %}
+
+{% block title %}{{ store.name }} — Painel SaaS{% endblock %}
+
+{% block content %}
+<div class="flex items-center gap-3 mb-6">
+    <a href="{% url 'saas_dashboard' %}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+    </a>
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ store.name }}</h2>
+        <span class="text-sm font-mono text-gray-400">{{ store.subdomain }}</span>
+        {% if store.is_active %}
+        <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Ativa
+        </span>
+        {% else %}
+        <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+            <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>Inativa
+        </span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Dados cadastrais -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+        <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">Dados da Loja</h3>
+        <dl class="space-y-3 text-sm">
+            <div class="flex justify-between">
+                <dt class="text-gray-500 dark:text-gray-400">ID</dt>
+                <dd class="font-medium text-gray-900 dark:text-white">{{ store.pk }}</dd>
+            </div>
+            <div class="flex justify-between">
+                <dt class="text-gray-500 dark:text-gray-400">Criada em</dt>
+                <dd class="text-gray-700 dark:text-gray-200">{{ store.created_at|date:"d/m/Y H:i" }}</dd>
+            </div>
+            <div class="flex justify-between">
+                <dt class="text-gray-500 dark:text-gray-400">Taxa de entrega</dt>
+                <dd class="text-gray-700 dark:text-gray-200">R$ {{ store.delivery_fee }}</dd>
+            </div>
+            {% if store.free_delivery_threshold %}
+            <div class="flex justify-between">
+                <dt class="text-gray-500 dark:text-gray-400">Frete grátis acima de</dt>
+                <dd class="text-gray-700 dark:text-gray-200">R$ {{ store.free_delivery_threshold }}</dd>
+            </div>
+            {% endif %}
+            <div class="flex justify-between">
+                <dt class="text-gray-500 dark:text-gray-400">Aceita pedidos</dt>
+                <dd>
+                    {% if store.delivery_enabled %}
+                    <span class="text-green-600 dark:text-green-400 font-medium">Sim</span>
+                    {% else %}
+                    <span class="text-red-500 dark:text-red-400 font-medium">Não</span>
+                    {% endif %}
+                </dd>
+            </div>
+            <div class="flex justify-between items-center">
+                <dt class="text-gray-500 dark:text-gray-400">Token MercadoPago</dt>
+                <dd class="font-mono text-xs text-gray-600 dark:text-gray-300">{{ masked_token }}</dd>
+            </div>
+        </dl>
+    </div>
+
+    <!-- Dados do gerente -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+        <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">Gerente</h3>
+        {% if store.owner %}
+        <dl class="space-y-3 text-sm">
+            <div class="flex justify-between">
+                <dt class="text-gray-500 dark:text-gray-400">Usuário</dt>
+                <dd class="font-medium text-gray-900 dark:text-white">{{ store.owner.username }}</dd>
+            </div>
+            <div class="flex justify-between">
+                <dt class="text-gray-500 dark:text-gray-400">E-mail</dt>
+                <dd class="text-gray-700 dark:text-gray-200">{{ store.owner.email }}</dd>
+            </div>
+            <div class="flex justify-between">
+                <dt class="text-gray-500 dark:text-gray-400">is_staff</dt>
+                <dd class="text-gray-700 dark:text-gray-200">{{ store.owner.is_staff|yesno:"Sim,Não" }}</dd>
+            </div>
+            <div class="flex justify-between">
+                <dt class="text-gray-500 dark:text-gray-400">Desde</dt>
+                <dd class="text-gray-700 dark:text-gray-200">{{ store.owner.date_joined|date:"d/m/Y" }}</dd>
+            </div>
+        </dl>
+        {% else %}
+        <p class="text-sm text-gray-400 dark:text-gray-500">Nenhum gerente associado.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Últimos pedidos -->
+<div class="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Últimos 10 Pedidos</h3>
+    </div>
+    {% if orders %}
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                <th class="px-5 py-3">#</th>
+                <th class="px-5 py-3">Cliente</th>
+                <th class="px-5 py-3">Status</th>
+                <th class="px-5 py-3 text-right">Total</th>
+                <th class="px-5 py-3">Data</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            {% for order in orders %}
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                <td class="px-5 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">#{{ order.pk }}</td>
+                <td class="px-5 py-3 text-gray-700 dark:text-gray-200">{{ order.customer_name }}</td>
+                <td class="px-5 py-3">
+                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                        {{ order.get_status_display }}
+                    </span>
+                </td>
+                <td class="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">R$ {{ order.total_amount }}</td>
+                <td class="px-5 py-3 text-xs text-gray-400 dark:text-gray-500">{{ order.created_at|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="px-5 py-8 text-center text-gray-400 dark:text-gray-500 text-sm">
+        Nenhum pedido registrado nesta loja.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -151,3 +151,40 @@ class SetThemeEndpointTest(TestCase):
         self.client.post(self.url, {'theme': 'light'})
         self.assertEqual(UserSettings.objects.filter(user=self.user).count(), 1)
         self.assertEqual(UserSettings.objects.get(user=self.user).theme, 'light')
+
+
+class DashboardTodaysOrdersTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='gestor', password='pw12345', is_staff=True
+        )
+        self.store = Store.objects.create(
+            name='Loja Teste', subdomain='teste', is_active=True
+        )
+        self.user.owned_store = self.store
+        self.user.save()
+
+    def _make_order(self):
+        return Order.objects.create(
+            store=self.store,
+            customer_name='Cliente',
+            customer_phone='11999999999',
+            delivery_address='Rua A, 1',
+            total_amount=Decimal('10.00'),
+            status=Order.Status.PREPARING,
+        )
+
+    def test_todays_orders_correct_after_9pm_brasilia(self):
+        """localdate() deve retornar a data em Brasília, não UTC."""
+        from datetime import date
+        from unittest.mock import patch
+
+        self._make_order()
+
+        with patch('django.utils.timezone.localdate', return_value=date.today()):
+            self.client.force_login(self.user)
+            response = self.client.get('/dashboard/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['todays_orders'], 1)

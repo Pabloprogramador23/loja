@@ -17,8 +17,11 @@ urlpatterns = [
     path('payment/pending/', views.payment_pending_view, name='payment_pending'),
     path('payment/failure/', views.payment_failure_view, name='payment_failure'),
     path('payment/mock/', views.payment_mock_view, name='payment_mock'),
+    path('payment/waiting/', views.payment_waiting_view, name='payment_waiting'),
+    path('payment/waiting/status/', views.payment_waiting_status_view, name='payment_waiting_status'),
     # Manager Dashboard Area
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/toggle-delivery/', views.toggle_delivery_view, name='toggle_delivery'),
     path('dashboard/orders/', views.manager_orders, name='manager_orders'),
     path('dashboard/orders/rows/', views.manager_orders_rows, name='manager_orders_rows'),
     path('dashboard/order/<int:order_id>/update/', views.update_order_status, name='update_status'),

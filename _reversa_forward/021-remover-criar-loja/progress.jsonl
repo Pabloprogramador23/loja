@@ -1,0 +1,7 @@
+{"ts":"2026-06-05T00:01:00Z","action":"T001","status":"done","files":["templates/accounts/login.html"]}
+{"ts":"2026-06-05T00:01:00Z","action":"T002","status":"done","files":["templates/accounts/criar_loja.html"]}
+{"ts":"2026-06-05T00:02:00Z","action":"T003","status":"done","files":["accounts/urls.py"]}
+{"ts":"2026-06-05T00:03:00Z","action":"T004","status":"done","files":["accounts/views.py"]}
+{"ts":"2026-06-05T00:04:00Z","action":"T005","status":"done","files":["accounts/forms.py"]}
+{"ts":"2026-06-05T00:05:00Z","action":"T006","status":"done","files":[]}
+{"ts":"2026-06-05T00:06:00Z","action":"T007","status":"done","files":["_reversa_forward/021-remover-criar-loja/regression-watch.md"]}

@@ -3,6 +3,13 @@
 {% block title %}Cardápio - {{ request.tenant.name }}{% endblock %}
 
 {% block content %}
+{% if not delivery_enabled %}
+<div class="bg-amber-50 dark:bg-amber-900/40 border-b border-amber-200 dark:border-amber-700">
+    <div class="max-w-7xl mx-auto px-4 py-3 text-center text-sm font-medium text-amber-800 dark:text-amber-200">
+        ⏸ Não estamos aceitando pedidos no momento. Volte mais tarde!
+    </div>
+</div>
+{% endif %}
 {% if not session_delivery_address and not request.user.is_staff %}
 <div id="location-banner" class="bg-indigo-50 dark:bg-indigo-900/30 border-b border-indigo-200 dark:border-indigo-700">
     <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8">

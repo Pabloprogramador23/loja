@@ -35,6 +35,10 @@ class Store(models.Model):
         validators=[MinValueValidator(Decimal('0.00'))],
         help_text="Pedidos com subtotal >= este valor ganham entrega gratuita. Nulo = recurso desativado."
     )
+    delivery_enabled = models.BooleanField(
+        default=True,
+        help_text="Quando False, a loja não aceita novos pedidos online."
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     owner = models.OneToOneField(
@@ -110,6 +114,7 @@ class Order(TenantAwareModel):
     user = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
     customer_name = models.CharField(max_length=255)
     customer_phone = models.CharField(max_length=20)
+    customer_email = models.CharField(max_length=254, blank=True, default='')
     delivery_address = models.TextField()
     status = models.CharField(
         max_length=20,
