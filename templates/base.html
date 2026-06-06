@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}StoreSaaS{% endblock %}</title>
+    <title>{% block title %}Pajeusystem{% endblock %}</title>
 
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
@@ -40,7 +40,7 @@
                     <img src="{{ request.tenant.logo.url }}" alt="{{ request.tenant.name }}"
                         class="h-10 w-auto rounded">
                     {% else %}
-                    <span class="text-xl font-bold">{{ request.tenant.name|default:"StoreSaaS" }}</span>
+                    <span class="text-xl font-bold">{{ request.tenant.name|default:"Pajeusystem" }}</span>
                     {% endif %}
                 </a>
             </div>
@@ -173,7 +173,7 @@
     </script>
     <footer class="bg-gray-800 dark:bg-gray-950 text-gray-300 dark:text-gray-400 py-6 mt-12">
         <div class="container mx-auto px-4 text-center">
-            <p>&copy; {% now "Y" %} StoreSaaS. Todos os direitos reservados.</p>
+            <p>&copy; {% now "Y" %} <a href="https://portfolio-pablo-eta.vercel.app" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors font-medium">Pajeusystem</a>. Todos os direitos reservados.</p>
         </div>
     </footer>
 </body>
