@@ -1,0 +1,10 @@
+{"ts":"2026-06-08T00:01:00Z","action":"T001","status":"done","files":["core/models.py"]}
+{"ts":"2026-06-08T00:02:00Z","action":"T002","status":"done","files":["core/migrations/0018_store_payment_method_toggles.py"]}
+{"ts":"2026-06-08T00:03:00Z","action":"T003","status":"done","files":["core/tests_toggle_payment_methods.py"]}
+{"ts":"2026-06-08T00:04:00Z","action":"T004","status":"done","files":["core/tests_toggle_payment_methods.py"]}
+{"ts":"2026-06-08T00:05:00Z","action":"T005","status":"done","files":["core/context_processors.py"]}
+{"ts":"2026-06-08T00:06:00Z","action":"T006","status":"done","files":["core/views.py"]}
+{"ts":"2026-06-08T00:07:00Z","action":"T007","status":"done","files":["core/forms.py"]}
+{"ts":"2026-06-08T00:08:00Z","action":"T008","status":"done","files":["templates/core/partials/cart_drawer.html"]}
+{"ts":"2026-06-08T00:09:00Z","action":"T009","status":"done","files":["templates/core/manager/settings.html"]}
+{"ts":"2026-06-08T00:10:00Z","action":"T010","status":"done","files":["_reversa_forward/024-toggle-metodos-pagamento/legacy-impact.md","_reversa_forward/024-toggle-metodos-pagamento/regression-watch.md","_reversa_forward/024-toggle-metodos-pagamento/progress.jsonl","_reversa_forward/024-toggle-metodos-pagamento/actions.md"]}

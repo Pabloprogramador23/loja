@@ -119,10 +119,17 @@
                         <p>R$ {{ cart_total_with_fee }}</p>
                     </div>
                     <!-- Seleção de método de pagamento -->
-                    <input type="hidden" name="payment_method" id="payment_method_input" value="online">
+                    {% if not payment_online_enabled and not payment_cash_enabled and not payment_card_enabled %}
+                    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg px-4 py-3 text-sm text-red-700 dark:text-red-300 font-medium text-center mb-3">
+                        Nenhum método de pagamento disponível no momento.
+                    </div>
+                    {% else %}
+                    <input type="hidden" name="payment_method" id="payment_method_input"
+                        value="{% if payment_online_enabled %}online{% elif payment_cash_enabled %}cash{% else %}card{% endif %}">
 
                     <p class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Como deseja pagar?</p>
                     <div class="flex gap-2 mb-3">
+                        {% if payment_online_enabled %}
                         <button type="button" id="btn-online"
                             _="on click set #payment_method_input.value to 'online'
                                then add .bg-green-600 .text-white to me
@@ -130,46 +137,59 @@
                                then add .bg-white .text-gray-700 .border-gray-300 .dark:bg-gray-700 .dark:text-gray-200 to #btn-entrega
                                then remove .bg-green-600 .text-white from #btn-entrega
                                then add .hidden to #entrega-options"
-                            class="flex-1 py-2 rounded-md border text-sm font-medium transition bg-green-600 text-white border-transparent">
+                            class="flex-1 py-2 rounded-md border text-sm font-medium transition {% if not payment_cash_enabled and not payment_card_enabled %}bg-green-600 text-white border-transparent{% else %}bg-green-600 text-white border-transparent{% endif %}">
                             Pagar Online
                         </button>
+                        {% endif %}
+                        {% if payment_cash_enabled or payment_card_enabled %}
                         <button type="button" id="btn-entrega"
-                            _="on click set #payment_method_input.value to 'cash'
+                            _="on click set #payment_method_input.value to '{% if payment_cash_enabled %}cash{% else %}card{% endif %}'
                                then add .bg-green-600 .text-white to me
                                then remove .bg-white .text-gray-700 .dark:bg-gray-700 .dark:text-gray-200 .border-gray-300 from me
+                               {% if payment_online_enabled %}
                                then add .bg-white .text-gray-700 .border-gray-300 .dark:bg-gray-700 .dark:text-gray-200 to #btn-online
                                then remove .bg-green-600 .text-white from #btn-online
+                               {% endif %}
                                then remove .hidden from #entrega-options"
-                            class="flex-1 py-2 rounded-md border text-sm font-medium transition bg-white text-gray-700 border-gray-300 dark:bg-gray-700 dark:text-gray-200">
+                            class="flex-1 py-2 rounded-md border text-sm font-medium transition {% if not payment_online_enabled %}bg-green-600 text-white border-transparent{% else %}bg-white text-gray-700 border-gray-300 dark:bg-gray-700 dark:text-gray-200{% endif %}">
                             Pagar na Entrega
                         </button>
+                        {% endif %}
                     </div>
 
                     <!-- Opções de pagamento na entrega -->
-                    <div id="entrega-options" class="hidden mb-3 space-y-2">
+                    <div id="entrega-options" class="{% if not payment_online_enabled %}{% else %}hidden{% endif %} mb-3 space-y-2">
                         <div class="flex gap-2">
+                            {% if payment_cash_enabled %}
                             <button type="button" id="btn-cash"
                                 _="on click set #payment_method_input.value to 'cash'
                                    then add .bg-indigo-600 .text-white to me
                                    then remove .bg-white .text-gray-600 .border-gray-300 from me
+                                   {% if payment_card_enabled %}
                                    then add .bg-white .text-gray-600 .border-gray-300 to #btn-card
                                    then remove .bg-indigo-600 .text-white from #btn-card
+                                   {% endif %}
                                    then remove .hidden from #troco-block
                                    then add .hidden to #card-type-block"
                                 class="flex-1 py-1.5 rounded border text-sm font-medium transition bg-indigo-600 text-white border-transparent">
                                 💵 Dinheiro
                             </button>
+                            {% endif %}
+                            {% if payment_card_enabled %}
                             <button type="button" id="btn-card"
                                 _="on click set #payment_method_input.value to 'card'
                                    then add .bg-indigo-600 .text-white to me
                                    then remove .bg-white .text-gray-600 .border-gray-300 from me
+                                   {% if payment_cash_enabled %}
                                    then add .bg-white .text-gray-600 .border-gray-300 to #btn-cash
                                    then remove .bg-indigo-600 .text-white from #btn-cash
+                                   {% endif %}
                                    then add .hidden to #troco-block
                                    then remove .hidden from #card-type-block"
-                                class="flex-1 py-1.5 rounded border text-sm font-medium transition bg-white text-gray-600 border-gray-300 dark:bg-gray-700 dark:text-gray-300">
+                                class="flex-1 py-1.5 rounded border text-sm font-medium transition {% if not payment_cash_enabled %}bg-indigo-600 text-white border-transparent{% else %}bg-white text-gray-600 border-gray-300 dark:bg-gray-700 dark:text-gray-300{% endif %}">
                                 💳 Cartão na Maquininha
                             </button>
+                            {% endif %}
                         </div>
 
                         <!-- Troco (Dinheiro) -->
@@ -194,11 +214,12 @@
                     </div>
 
                     <button type="submit"
-                        {% if not delivery_enabled %}disabled{% endif %}
+                        {% if not delivery_enabled or not payment_online_enabled and not payment_cash_enabled and not payment_card_enabled %}disabled{% endif %}
                         class="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white transition relative
                                {% if delivery_enabled %}bg-green-600 hover:bg-green-700{% else %}bg-gray-400 dark:bg-gray-600 cursor-not-allowed{% endif %}">
-                        {% if delivery_enabled %}Confirmar Pedido{% else %}Loja fechada{% endif %}
+                        {% if not delivery_enabled %}Loja fechada{% else %}Confirmar Pedido{% endif %}
                     </button>
+                    {% endif %}
                 </div>
             </form>
         </div>

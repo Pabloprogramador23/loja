@@ -209,6 +209,17 @@ def checkout(request):
     if payment_method not in Order.PaymentMethod.values:
         payment_method = 'online'
 
+    if store:
+        allowed_methods = {
+            'online': store.payment_online_enabled,
+            'cash':   store.payment_cash_enabled,
+            'card':   store.payment_card_enabled,
+        }
+        if not any(allowed_methods.values()):
+            return _checkout_error(request, cart, 'Nenhum método de pagamento disponível no momento.')
+        if not allowed_methods.get(payment_method, False):
+            return _checkout_error(request, cart, 'Método de pagamento não disponível.')
+
     # Valida change_amount antes de criar o pedido
     change_amount = None
     if payment_method == Order.PaymentMethod.CASH:

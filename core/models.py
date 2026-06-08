@@ -39,6 +39,18 @@ class Store(models.Model):
         default=True,
         help_text="Quando False, a loja não aceita novos pedidos online."
     )
+    payment_online_enabled = models.BooleanField(
+        default=True,
+        help_text="Aceitar pagamento online via MercadoPago (PIX/Checkout Pro)."
+    )
+    payment_cash_enabled = models.BooleanField(
+        default=True,
+        help_text="Aceitar pagamento em dinheiro na entrega."
+    )
+    payment_card_enabled = models.BooleanField(
+        default=True,
+        help_text="Aceitar pagamento com cartão na maquininha."
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     owner = models.OneToOneField(

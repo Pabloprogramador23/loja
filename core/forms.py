@@ -68,7 +68,7 @@ PASSWORD_INPUT_CLASS = INPUT_CLASS
 class StoreSettingsForm(forms.ModelForm):
     class Meta:
         model = Store
-        fields = ['name', 'logo', 'cover_image', 'mercadopago_access_token', 'delivery_fee', 'free_delivery_threshold', 'delivery_enabled']
+        fields = ['name', 'logo', 'cover_image', 'mercadopago_access_token', 'delivery_fee', 'free_delivery_threshold', 'delivery_enabled', 'payment_online_enabled', 'payment_cash_enabled', 'payment_card_enabled']
         labels = {
             'name': 'Nome da Loja',
             'logo': 'Logotipo',
@@ -77,6 +77,9 @@ class StoreSettingsForm(forms.ModelForm):
             'delivery_fee': 'Taxa de entrega (R$)',
             'free_delivery_threshold': 'Entrega grátis acima de (R$)',
             'delivery_enabled': 'Aceitar pedidos online',
+            'payment_online_enabled': 'Aceitar MercadoPago (PIX/Checkout Pro)',
+            'payment_cash_enabled': 'Aceitar Dinheiro na entrega',
+            'payment_card_enabled': 'Aceitar Cartão na maquininha',
         }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400'}),
@@ -86,6 +89,9 @@ class StoreSettingsForm(forms.ModelForm):
             'delivery_fee': forms.NumberInput(attrs={'step': '0.01', 'min': '0', 'class': 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400'}),
             'free_delivery_threshold': forms.NumberInput(attrs={'step': '0.01', 'min': '0', 'class': 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400', 'id': 'id_free_delivery_threshold'}),
             'delivery_enabled': forms.CheckboxInput(attrs={'class': 'h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700'}),
+            'payment_online_enabled': forms.CheckboxInput(attrs={'class': 'h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700'}),
+            'payment_cash_enabled': forms.CheckboxInput(attrs={'class': 'h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700'}),
+            'payment_card_enabled': forms.CheckboxInput(attrs={'class': 'h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700'}),
         }
 
     def clean_free_delivery_threshold(self):

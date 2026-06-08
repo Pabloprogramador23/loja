@@ -34,6 +34,9 @@ def cart(request):
         'cart_total_with_fee': cart_total_with_fee,
         'threshold_gap': threshold_gap,
         'delivery_enabled': tenant.delivery_enabled if tenant else True,
+        'payment_online_enabled': tenant.payment_online_enabled if tenant else True,
+        'payment_cash_enabled': tenant.payment_cash_enabled if tenant else True,
+        'payment_card_enabled': tenant.payment_card_enabled if tenant else True,
     }
 
 def theme_preference(request):
