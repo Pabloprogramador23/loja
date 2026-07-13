@@ -540,6 +540,13 @@ def manager_product_edit(request, product_id):
             if nome:
                 category, _ = Category.objects.get_or_create(name__iexact=nome, defaults={'name': nome})
                 form.instance.category = category
+            
+            # Log deletion or updates of product images
+            if form.cleaned_data.get('clear_image'):
+                logger.info("Product %s image cleared by user %s", product.id, request.user.username)
+            elif 'image' in request.FILES:
+                logger.info("Product %s image updated by user %s", product.id, request.user.username)
+                
             form.save()
             return redirect('manager_products')
     else:
@@ -560,6 +567,16 @@ def manager_settings(request):
     if request.method == 'POST':
         form = StoreSettingsForm(request.POST, request.FILES, instance=tenant)
         if form.is_valid():
+            # Log deletion or updates of logo and cover images
+            clear_logo = form.cleaned_data.get('clear_logo')
+            clear_cover = form.cleaned_data.get('clear_cover_image')
+            if clear_logo or clear_cover:
+                logger.info("Store %s settings updated by user %s: clear_logo=%s, clear_cover_image=%s", tenant.id, request.user.username, clear_logo, clear_cover)
+            if 'logo' in request.FILES:
+                logger.info("Store %s logo updated by user %s", tenant.id, request.user.username)
+            if 'cover_image' in request.FILES:
+                logger.info("Store %s cover_image updated by user %s", tenant.id, request.user.username)
+
             form.save()
             return redirect('manager_settings')
     else:

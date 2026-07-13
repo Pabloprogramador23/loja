@@ -18,8 +18,10 @@
             </p>
         </div>
         <div class="mt-5 md:mt-0 md:col-span-2">
-            <form action="." method="POST" enctype="multipart/form-data">
+            <form action="." method="POST" enctype="multipart/form-data" id="store-settings-form">
                 {% csrf_token %}
+                {{ form.clear_logo }}
+                {{ form.clear_cover_image }}
 
                 {% if form.errors %}
                 <div class="rounded-md bg-red-50 dark:bg-red-900/30 p-4 mb-5">
@@ -148,9 +150,17 @@
                         </label>
                         <div class="mt-1 flex items-center">
                             {% if request.tenant.logo %}
-                            <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 mr-4">
-                                <img src="{{ request.tenant.logo.url }}" class="h-full w-full object-cover">
-                            </span>
+                            <div id="logo-preview-container" class="relative inline-block mr-4">
+                                <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 shadow-sm border border-gray-200 dark:border-gray-600">
+                                    <img src="{{ request.tenant.logo.url }}" class="h-full w-full object-cover">
+                                </span>
+                                <button type="button" onclick="markLogoDeleted()" class="absolute -top-1.5 -right-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 shadow-md focus:outline-none transition-colors duration-150" title="Remover logotipo">
+                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <span id="logo-deleted-label" class="hidden text-sm text-red-600 dark:text-red-400 mr-4 italic font-medium">Logotipo marcado para exclusão</span>
                             {% endif %}
                             {{ form.logo }}
                         </div>
@@ -163,9 +173,17 @@
                         </label>
                         <div class="mt-1 flex items-center">
                             {% if request.tenant.cover_image %}
-                            <span class="inline-block h-12 w-12 rounded overflow-hidden bg-gray-100 dark:bg-gray-700 mr-4">
-                                <img src="{{ request.tenant.cover_image.url }}" class="h-10 w-20 object-cover">
-                            </span>
+                            <div id="cover-preview-container" class="relative inline-block mr-4">
+                                <span class="inline-block h-12 w-20 rounded overflow-hidden bg-gray-100 dark:bg-gray-700 shadow-sm border border-gray-200 dark:border-gray-600">
+                                    <img src="{{ request.tenant.cover_image.url }}" class="h-full w-full object-cover">
+                                </span>
+                                <button type="button" onclick="markCoverDeleted()" class="absolute -top-1.5 -right-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 shadow-md focus:outline-none transition-colors duration-150" title="Remover imagem de capa">
+                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <span id="cover-deleted-label" class="hidden text-sm text-red-600 dark:text-red-400 mr-4 italic font-medium">Imagem de capa marcada para exclusão</span>
                             {% endif %}
                             {{ form.cover_image }}
                         </div>
@@ -175,7 +193,7 @@
                 <div class="pt-5 border-t border-gray-200 dark:border-gray-700 mt-5">
                     <div class="flex justify-end">
                         <button type="submit"
-                            class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
                             Salvar Configurações
                         </button>
                     </div>
@@ -184,4 +202,66 @@
         </div>
     </div>
 </div>
+
+<script>
+    function markLogoDeleted() {
+        document.getElementById('id_clear_logo').value = 'True';
+        document.getElementById('logo-preview-container').classList.add('hidden');
+        document.getElementById('logo-deleted-label').classList.remove('hidden');
+    }
+    function resetLogoDeleted() {
+        document.getElementById('id_clear_logo').value = '';
+        const preview = document.getElementById('logo-preview-container');
+        if (preview) {
+            preview.classList.remove('hidden');
+        }
+        const label = document.getElementById('logo-deleted-label');
+        if (label) {
+            label.classList.add('hidden');
+        }
+    }
+    function markCoverDeleted() {
+        document.getElementById('id_clear_cover_image').value = 'True';
+        document.getElementById('cover-preview-container').classList.add('hidden');
+        document.getElementById('cover-deleted-label').classList.remove('hidden');
+    }
+    function resetCoverDeleted() {
+        document.getElementById('id_clear_cover_image').value = '';
+        const preview = document.getElementById('cover-preview-container');
+        if (preview) {
+            preview.classList.remove('hidden');
+        }
+        const label = document.getElementById('cover-deleted-label');
+        if (label) {
+            label.classList.add('hidden');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const logoInput = document.querySelector('input[name="logo"]');
+        if (logoInput) {
+            logoInput.addEventListener('change', resetLogoDeleted);
+        }
+        const coverInput = document.querySelector('input[name="cover_image"]');
+        if (coverInput) {
+            coverInput.addEventListener('change', resetCoverDeleted);
+        }
+
+        document.getElementById('store-settings-form').addEventListener('submit', function(e) {
+            const clearLogo = document.getElementById('id_clear_logo').value === 'True';
+            const clearCover = document.getElementById('id_clear_cover_image').value === 'True';
+            
+            if (clearLogo || clearCover) {
+                let message = "Você marcou a(s) seguinte(s) imagem(ns) para exclusão definitiva:\n";
+                if (clearLogo) message += "- Logotipo da loja\n";
+                if (clearCover) message += "- Imagem de capa da loja\n";
+                message += "\nEsta ação apagará fisicamente o arquivo do servidor. Deseja continuar?";
+                
+                if (!confirm(message)) {
+                    e.preventDefault();
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

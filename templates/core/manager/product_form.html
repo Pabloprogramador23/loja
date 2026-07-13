@@ -23,8 +23,9 @@
             </p>
         </div>
         <div class="mt-5 md:mt-0 md:col-span-2">
-            <form action="." method="POST" enctype="multipart/form-data">
+            <form action="." method="POST" enctype="multipart/form-data" id="product-form">
                 {% csrf_token %}
+                {{ form.clear_image }}
 
                 {% if form.errors %}
                 <div class="rounded-md bg-red-50 dark:bg-red-900/30 p-4 mb-5">
@@ -99,9 +100,17 @@
                         </label>
                         <div class="mt-1 flex items-center">
                             {% if product and product.image %}
-                            <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 mr-4">
-                                <img src="{{ product.image.url }}" class="h-full w-full object-cover">
-                            </span>
+                            <div id="image-preview-container" class="relative inline-block mr-4">
+                                <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 shadow-sm border border-gray-200 dark:border-gray-600">
+                                    <img src="{{ product.image.url }}" class="h-full w-full object-cover">
+                                </span>
+                                <button type="button" onclick="markImageDeleted()" class="absolute -top-1.5 -right-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 shadow-md focus:outline-none transition-colors duration-150" title="Remover imagem do produto">
+                                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <span id="image-deleted-label" class="hidden text-sm text-red-600 dark:text-red-400 mr-4 italic font-medium">Imagem marcada para exclusão</span>
                             {% endif %}
                             {{ form.image }}
                         </div>
@@ -130,7 +139,7 @@
                             Cancelar
                         </button>
                         <button type="submit"
-                            class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
                             Salvar
                         </button>
                     </div>
@@ -139,4 +148,41 @@
         </div>
     </div>
 </div>
+
+<script>
+    function markImageDeleted() {
+        document.getElementById('id_clear_image').value = 'True';
+        document.getElementById('image-preview-container').classList.add('hidden');
+        document.getElementById('image-deleted-label').classList.remove('hidden');
+    }
+    function resetImageDeleted() {
+        document.getElementById('id_clear_image').value = '';
+        const preview = document.getElementById('image-preview-container');
+        if (preview) {
+            preview.classList.remove('hidden');
+        }
+        const label = document.getElementById('image-deleted-label');
+        if (label) {
+            label.classList.add('hidden');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.querySelector('input[name="image"]');
+        if (imageInput) {
+            imageInput.addEventListener('change', resetImageDeleted);
+        }
+
+        document.getElementById('product-form').addEventListener('submit', function(e) {
+            const clearImage = document.getElementById('id_clear_image').value === 'True';
+            
+            if (clearImage) {
+                const message = "Você marcou a imagem do produto para exclusão definitiva.\n\nEsta ação apagará fisicamente o arquivo do servidor. Deseja continuar?";
+                if (!confirm(message)) {
+                    e.preventDefault();
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

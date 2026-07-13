@@ -26,6 +26,10 @@ class ProductForm(forms.ModelForm):
         help_text='Preencha para criar e usar uma nova categoria. Deixe em branco para usar a seleção acima.',
         widget=forms.TextInput(attrs={'class': 'mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm', 'placeholder': 'Ex: Sobremesas'}),
     )
+    clear_image = forms.BooleanField(
+        required=False,
+        widget=forms.HiddenInput(attrs={'id': 'id_clear_image'}),
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -38,6 +42,16 @@ class ProductForm(forms.ModelForm):
         if not category and not new_name:
             raise forms.ValidationError('Selecione uma categoria existente ou preencha o campo "Nova categoria".')
         return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if self.cleaned_data.get('clear_image'):
+            if instance.image:
+                instance.image.delete(save=False)
+                instance.image = None
+        if commit:
+            instance.save()
+        return instance
 
     class Meta:
         model = Product
@@ -66,6 +80,29 @@ PASSWORD_INPUT_CLASS = INPUT_CLASS
 
 
 class StoreSettingsForm(forms.ModelForm):
+    clear_logo = forms.BooleanField(
+        required=False,
+        widget=forms.HiddenInput(attrs={'id': 'id_clear_logo'}),
+    )
+    clear_cover_image = forms.BooleanField(
+        required=False,
+        widget=forms.HiddenInput(attrs={'id': 'id_clear_cover_image'}),
+    )
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if self.cleaned_data.get('clear_logo'):
+            if instance.logo:
+                instance.logo.delete(save=False)
+                instance.logo = None
+        if self.cleaned_data.get('clear_cover_image'):
+            if instance.cover_image:
+                instance.cover_image.delete(save=False)
+                instance.cover_image = None
+        if commit:
+            instance.save()
+        return instance
+
     class Meta:
         model = Store
         fields = ['name', 'logo', 'cover_image', 'mercadopago_access_token', 'delivery_fee', 'free_delivery_threshold', 'delivery_enabled', 'payment_online_enabled', 'payment_cash_enabled', 'payment_card_enabled']

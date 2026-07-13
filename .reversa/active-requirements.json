@@ -1,11 +1,11 @@
 {
   "schema-version": 1,
-  "feature-dir": "_reversa_forward/024-toggle-metodos-pagamento",
-  "feature-id": "024",
-  "short-name": "toggle-metodos-pagamento",
-  "started-at": "2026-06-08T00:00:00Z",
-  "current-stage": "done",
-  "stages-completed": ["requirements", "plan", "to-do", "coding"],
+  "feature-dir": "_reversa_forward/025-exclusao-imagens-painel",
+  "feature-id": "025",
+  "short-name": "exclusao-imagens-painel",
+  "started-at": "2026-07-13T14:29:32Z",
+  "current-stage": "requirements",
+  "stages-completed": [],
   "paused-features": [
     {
       "feature-dir": "_reversa_forward/002-cadastro-loja-saas",

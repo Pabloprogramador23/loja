@@ -1,5 +1,5 @@
 {
-  "version": "1.2.43",
+  "version": "1.2.50",
   "project": "loja",
   "user_name": "PAblo",
   "chat_language": "pt-br",
@@ -68,7 +68,13 @@
         "_reversa_sdd/architecture.md",
         "_reversa_sdd/erd-complete.md"
       ],
-      "regression_check": {"features": 1, "watch_items": 5, "green": 5, "yellow": 0, "red": 0}
+      "regression_check": {
+        "features": 1,
+        "watch_items": 5,
+        "green": 5,
+        "yellow": 0,
+        "red": 0
+      }
     }
   ],
   "checkpoints": {
@@ -81,13 +87,24 @@
         ".reversa/context/surface.json"
       ],
       "new_files_detected": 25,
-      "modules_affected": ["core", "accounts", "store_saas"],
-      "new_integrations": ["Uber Direct", "Google OAuth2 (django-allauth)"]
+      "modules_affected": [
+        "core",
+        "accounts",
+        "store_saas"
+      ],
+      "new_integrations": [
+        "Uber Direct",
+        "Google OAuth2 (django-allauth)"
+      ]
     },
     "archaeologist": {
       "completed_at": "2026-05-31T00:00:00Z",
       "re_extraction": true,
-      "modules_analyzed": ["store_saas", "core", "accounts"],
+      "modules_analyzed": [
+        "store_saas",
+        "core",
+        "accounts"
+      ],
       "modules_pending": [],
       "files": [
         "_reversa_sdd/code-analysis.md",
@@ -99,8 +116,22 @@
         "_reversa_sdd/flowcharts/core-multitenancy.md",
         ".reversa/context/modules.json"
       ],
-      "new_entities": ["UberDirectConfig", "UberDirectDelivery", "UberDirectDeliveryEvent", "UserProfile"],
-      "new_functions": ["create_checkout_pro_preference", "uber_direct_quote", "uber_direct_webhook", "process_uber_webhook", "save_location", "auth_modal_view", "checkout_login_view", "checkout_signup_view"],
+      "new_entities": [
+        "UberDirectConfig",
+        "UberDirectDelivery",
+        "UberDirectDeliveryEvent",
+        "UserProfile"
+      ],
+      "new_functions": [
+        "create_checkout_pro_preference",
+        "uber_direct_quote",
+        "uber_direct_webhook",
+        "process_uber_webhook",
+        "save_location",
+        "auth_modal_view",
+        "checkout_login_view",
+        "checkout_signup_view"
+      ],
       "business_rules_count": 24
     },
     "detective": {
@@ -117,22 +148,51 @@
         "_reversa_sdd/adrs/006-processamento-assincrono-celery.md"
       ],
       "business_rules": 18,
-      "state_machines": ["Order", "Product.is_available", "Store.is_active"],
+      "state_machines": [
+        "Order",
+        "Product.is_available",
+        "Store.is_active"
+      ],
       "adrs": 6,
-      "gaps_critical": ["L-01", "L-02", "L-03", "L-04", "L-06", "L-07", "L-10", "G-01", "G-03"]
+      "gaps_critical": [
+        "L-01",
+        "L-02",
+        "L-03",
+        "L-04",
+        "L-06",
+        "L-07",
+        "L-10",
+        "G-01",
+        "G-03"
+      ]
     },
     "writer": {
       "completed_at": "2026-05-26T18:00:00Z",
       "units_generated": 15,
       "files_generated": 75,
       "units": [
-        "store_saas", "store_saas/roteamento-asgi", "store_saas/configuracao-celery",
-        "core", "core/multi-tenancy", "core/catalogo", "core/carrinho",
-        "core/checkout", "core/pagamento", "core/pedidos", "core/dashboard-manager",
-        "core/api-fastapi", "core/celery-tasks",
-        "accounts", "accounts/autenticacao"
+        "store_saas",
+        "store_saas/roteamento-asgi",
+        "store_saas/configuracao-celery",
+        "core",
+        "core/multi-tenancy",
+        "core/catalogo",
+        "core/carrinho",
+        "core/checkout",
+        "core/pagamento",
+        "core/pedidos",
+        "core/dashboard-manager",
+        "core/api-fastapi",
+        "core/celery-tasks",
+        "accounts",
+        "accounts/autenticacao"
       ],
-      "globals": ["openapi/loja-api.yaml", "user-stories/compra-online.md", "user-stories/gestao-loja.md", "traceability/code-spec-matrix.md"],
+      "globals": [
+        "openapi/loja-api.yaml",
+        "user-stories/compra-online.md",
+        "user-stories/gestao-loja.md",
+        "traceability/code-spec-matrix.md"
+      ],
       "coverage_estimate": "95% dos arquivos .py de negócio mapeados"
     },
     "reviewer": {
@@ -162,10 +222,21 @@
         "_reversa_sdd/deployment.md",
         "_reversa_sdd/traceability/spec-impact-matrix.md"
       ],
-      "containers": ["Web Application (Uvicorn/Django+FastAPI)", "Celery Worker", "PostgreSQL", "Redis"],
-      "integrations": ["MercadoPago (PIX gateway)"],
+      "containers": [
+        "Web Application (Uvicorn/Django+FastAPI)",
+        "Celery Worker",
+        "PostgreSQL",
+        "Redis"
+      ],
+      "integrations": [
+        "MercadoPago (PIX gateway)"
+      ],
       "tech_debts_documented": 12,
-      "c4_levels": ["Context", "Containers", "Components"]
+      "c4_levels": [
+        "Context",
+        "Containers",
+        "Components"
+      ]
     }
   },
   "engines": [
